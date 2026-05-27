@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Light Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --dark: #0d1117;
+  --dark-surface: #161b22;
+  --green: #1a7a4a;
+  --green-light: #3fb950;
+  --green-glow: rgba(63,185,80,0.15);
+  --warm: #f5f4f0;
+  --warm-text: #1a1814;
+  --warm-muted: #6b6760;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  cursor: default;
+}
+
+/* ── SPLIT LAYOUT ── */
+.split {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ── PANEL BASE ── */
+.panel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: flex 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.panel:hover { flex: 1.18; }
+
+/* ── DARK PANEL (Admin) ── */
+.panel-admin {
+  background: var(--dark);
+  color: #e6edf3;
+}
+
+/* Animated grid background */
+.panel-admin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(63,185,80,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(63,185,80,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridDrift 20s linear infinite;
+}
+@keyframes gridDrift {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(40px, 40px); }
+}
+
+/* Glow orb */
+.panel-admin::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(63,185,80,0.12) 0%, transparent 65%);
+  pointer-events: none;
+  animation: orbPulse 4s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%,100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+/* ── LIGHT PANEL (Attend) ── */
+.panel-attend {
+  background: var(--warm);
+  color: var(--warm-text);
+  border-left: 1px solid #e2dfd8;
+}
+
+/* Organic texture */
+.panel-attend::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1' fill='%231a7a4a' opacity='0.06'/%3E%3Ccircle cx='10' cy='10' r='0.5' fill='%231a7a4a' opacity='0.04'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%231a7a4a' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+
+/* Warm glow top right */
+.panel-attend::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(26,122,74,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* ── DIVIDER LINE ── */
+.divider-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, #30363d 20%, #30363d 80%, transparent);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── CONTENT ── */
+.panel-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 320px;
+}
+
+/* ── LOGO ── */
+.logo {
+  font-family: 'Fraunces', serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 0.7s ease forwards;
+}
+.panel-admin .logo { color: #8b949e; }
+.panel-attend .logo { color: var(--warm-muted); }
+
+/* ── ICON ── */
+.panel-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.1s forwards;
+  position: relative;
+}
+
+.panel-admin .panel-icon {
+  background: rgba(63,185,80,0.1);
+  border: 1px solid rgba(63,185,80,0.25);
+  box-shadow: 0 0 32px rgba(63,185,80,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.panel-attend .panel-icon {
+  background: rgba(26,122,74,0.08);
+  border: 1px solid rgba(26,122,74,0.2);
+  box-shadow: 0 4px 24px rgba(26,122,74,0.08);
+}
+
+/* Ping animation on icon */
+.panel-icon::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 24px;
+  border: 1px solid;
+  opacity: 0;
+  animation: ping 3s ease-out infinite;
+}
+.panel-admin .panel-icon::after { border-color: rgba(63,185,80,0.3); }
+.panel-attend .panel-icon::after { border-color: rgba(26,122,74,0.2); }
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ── HEADING ── */
+.panel-heading {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem;
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.2s forwards;
+}
+.panel-admin .panel-heading { color: #e6edf3; }
+.panel-attend .panel-heading { color: var(--warm-text); }
+
+.panel-heading em {
+  font-style: italic;
+  font-weight: 300;
+}
+.panel-admin .panel-heading em { color: var(--green-light); }
+.panel-attend .panel-heading em { color: var(--green); }
+
+/* ── DESC ── */
+.panel-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.3s forwards;
+}
+.panel-admin .panel-desc { color: #8b949e; }
+.panel-attend .panel-desc { color: var(--warm-muted); }
+
+/* ── FEATURES ── */
+.features {
+  list-style: none;
+  margin-bottom: 36px;
+  width: 100%;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.4s forwards;
+}
+.features li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.82rem;
+  text-align: left;
+  border-bottom: 1px solid;
+}
+.panel-admin .features li { border-color: rgba(48,54,61,0.5); color: #8b949e; }
+.panel-attend .features li { border-color: rgba(226,223,216,0.6); color: var(--warm-muted); }
+.features li:last-child { border-bottom: none; }
+.feat-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.panel-admin .feat-dot { background: var(--green-light); }
+.panel-attend .feat-dot { background: var(--green); }
+
+/* ── CTA BUTTON ── */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 28px;
+  border-radius: 10px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  opacity: 0;
+  animation: fadeUp 0.7s ease 0.5s forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+.cta:hover::before { transform: translateX(0); }
+
+.panel-admin .cta {
+  background: var(--green-light);
+  color: #0d1117;
+  box-shadow: 0 0 24px rgba(63,185,80,0.25);
+}
+.panel-admin .cta:hover {
+  box-shadow: 0 0 36px rgba(63,185,80,0.4);
+  transform: translateY(-2px);
+}
+
+.panel-attend .cta {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(26,122,74,0.2);
+}
+.panel-attend .cta:hover {
+  background: #145f39;
+  box-shadow: 0 6px 28px rgba(26,122,74,0.3);
+  transform: translateY(-2px);
+}
+
+.cta-arrow {
+  transition: transform 0.2s ease;
+  font-size: 1rem;
+}
+.cta:hover .cta-arrow { transform: translateX(4px); }
+
+/* ── CORNER TAG ── */
+.corner-tag {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.35;
+  animation: fadeIn 1s ease 0.8s forwards;
+  opacity: 0;
+}
+.panel-admin .corner-tag { top: 24px; left: 24px; color: var(--green-light); }
+.panel-attend .corner-tag { top: 24px; right: 24px; color: var(--green); }
+
+/* ── BOTTOM STATUS ── */
+.bottom-status {
+  position: absolute;
+  bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  animation: fadeIn 1s ease 1s forwards;
+}
+.panel-admin .bottom-status { color: #484f58; }
+.panel-attend .bottom-status { color: #b5b2ac; }
+.status-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  animation: blink 2s infinite;
+}
+.panel-admin .status-dot { background: var(--green-light); }
+.panel-attend .status-dot { background: var(--green); }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* ── CENTRE BRAND ── */
+.centre-brand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px rgba(13,17,23,0.8), 0 0 24px rgba(63,185,80,0.15);
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeIn 0.8s ease 0.6s forwards;
+}
+.centre-brand-inner {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--green-light);
+  font-style: italic;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 640px) {
+  .split { flex-direction: column; overflow-y: auto; }
+  html, body { overflow: auto; height: auto; }
+  .panel { flex: none; min-height: 100vh; padding: 60px 28px; }
+  .panel:hover { flex: none; }
+  .divider-line { display: none; }
+  .centre-brand { display: none; }
+  .panel-attend { border-left: none; border-top: 1px solid #e2dfd8; }
+}
+</style>
+</head>
+<body>
+
+<div class="split">
+
+  <!-- ── ADMIN PANEL ── -->
+  <a class="panel panel-admin" href="admin.html">
+    <div class="corner-tag">v1.0 · Admin</div>
+
+    <div class="panel-inner">
+      <div class="logo">Light Check</div>
+
+      <div class="panel-icon">▦</div>
+
+      <div class="panel-heading">
+        Admin<br/><em>Console</em>
+      </div>
+
+      <div class="panel-desc">
+        Full visibility over your team's attendance. Manage employees, review live activity, and export reports.
+      </div>
+
+      <ul class="features">
+        <li><div class="feat-dot"></div>Live attendance dashboard</li>
+        <li><div class="feat-dot"></div>Employee &amp; device management</li>
+        <li><div class="feat-dot"></div>Reports &amp; CSV export</li>
+        <li><div class="feat-dot"></div>API &amp; schedule settings</li>
+      </ul>
+
+      <div class="cta">
+        Enter Admin <span class="cta-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="bottom-status">
+      <div class="status-dot"></div>
+      Secured · Password protected
+    </div>
+  </a>
+
+  <!-- ── CENTRE BRAND ── -->
+  <div class="divider-line"></div>
+  <div class="centre-brand">
+    <div class="centre-brand-inner">L</div>
+  </div>
+
+  <!-- ── ATTEND PANEL ── -->
+  <a class="panel panel-attend" href="attend.html">
+    <div class="corner-tag">Employee · Attend</div>
+
+    <div class="panel-inner">
+      <div class="logo">Light Check</div>
+
+      <div class="panel-icon">◉</div>
+
+      <div class="panel-heading">
+        Check<br/><em>In & Out</em>
+      </div>
+
+      <div class="panel-desc">
+        Record your attendance quickly using face recognition, device biometrics, or manual entry.
+      </div>
+
+      <ul class="features">
+        <li><div class="feat-dot"></div>Face recognition check-in</li>
+        <li><div class="feat-dot"></div>Touch ID / Face ID support</li>
+        <li><div class="feat-dot"></div>GPS location tagging</li>
+        <li><div class="feat-dot"></div>Personal daily history</li>
+      </ul>
+
+      <div class="cta">
+        Check In Now <span class="cta-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="bottom-status">
+      <div class="status-dot"></div>
+      <span id="live-time">--:--:--</span> · Local time
+    </div>
+  </a>
+
+</div>
+
+<script>
+  setInterval(()=>{
+    document.getElementById('live-time').textContent = new Date().toLocaleTimeString();
+  }, 1000);
+</script>
+</body>
+</html>

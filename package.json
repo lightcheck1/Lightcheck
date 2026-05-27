@@ -1,0 +1,6 @@
+{
+  "name": "lightcheck",
+  "scripts": {
+    "start": "npx serve . -l 5000"
+  }
+}

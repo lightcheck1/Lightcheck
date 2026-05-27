@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Light Check — Attend</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,700;1,300;1,500&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f5f4f0;
+  --surface:#ffffff;
+  --surface2:#f0eeea;
+  --border:#e2dfd8;
+  --text:#1a1814;
+  --text2:#6b6760;
+  --text3:#b5b2ac;
+  --green:#1a7a4a;
+  --green-bg:#eaf5ef;
+  --green-border:#b6dfc8;
+  --red:#c0392b;
+  --red-bg:#fdf0ee;
+  --red-border:#f0b9b3;
+  --amber:#8a5c00;
+  --amber-bg:#fef9ec;
+  --amber-border:#f5dfa0;
+  --blue:#1a4f8a;
+  --blue-bg:#eef4fd;
+  --blue-border:#b3cef0;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;}
+
+/* TOP BAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.brand{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;}
+.brand em{font-style:italic;color:var(--green);}
+.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-top:1px;}
+.top-right{display:flex;align-items:center;gap:12px;}
+.clock{font-family:'IBM Plex Mono',monospace;font-size:0.85rem;color:var(--text2);}
+.admin-link{font-size:0.78rem;color:var(--text2);text-decoration:none;border:1px solid var(--border);padding:5px 12px;border-radius:20px;transition:all 0.15s;}
+.admin-link:hover{background:var(--surface2);color:var(--text);}
+
+/* LAYOUT */
+.container{max-width:960px;margin:0 auto;padding:28px 20px;}
+
+/* IDENTITY CARD */
+.id-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
+.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#c8e6d4,#a8d5bc);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;color:var(--green);flex-shrink:0;}
+.emp-info .emp-name{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;}
+.emp-info .emp-meta{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--text2);margin-top:2px;}
+.id-card-right{margin-left:auto;text-align:right;}
+.shift-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);}
+.shift-time{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--text);margin-top:2px;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.card-title{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:14px;}
+
+/* CAMERA */
+#cam-wrap{position:relative;border-radius:10px;overflow:hidden;background:#111;border:1px solid var(--border);aspect-ratio:4/3;}
+#video{width:100%;height:100%;object-fit:cover;display:block;}
+#canvas{display:none;}
+.cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.face-ring{width:180px;height:180px;border-radius:50%;border:2px solid rgba(26,122,74,0.7);box-shadow:0 0 0 5px rgba(26,122,74,0.1),inset 0 0 24px rgba(26,122,74,0.05);animation:ring 2.5s ease-in-out infinite;}
+@keyframes ring{0%,100%{box-shadow:0 0 0 5px rgba(26,122,74,0.1),inset 0 0 24px rgba(26,122,74,0.05);}50%{box-shadow:0 0 0 10px rgba(26,122,74,0.18),inset 0 0 32px rgba(26,122,74,0.1);}}
+.scan-bar{position:absolute;width:180px;height:2px;background:linear-gradient(90deg,transparent,rgba(26,122,74,0.7),transparent);animation:scan 2.5s ease-in-out infinite;}
+@keyframes scan{0%{top:calc(50% - 90px);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(50% + 90px);opacity:0;}}
+.cam-live{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.5);padding:3px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:#fff;display:flex;align-items:center;gap:5px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#ff4444;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* STATUS ROW */
+.status-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.status-chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:0.82rem;}
+.chip-icon{font-size:1rem;}
+.chip-label{color:var(--text2);font-size:0.72rem;}
+.chip-val{font-weight:500;font-size:0.82rem;}
+
+/* FORM */
+.fg{margin-bottom:12px;}
+.fl{display:block;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin-bottom:5px;}
+.fi{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.15s;}
+.fi:focus{border-color:var(--green);background:var(--surface);}
+.fsel{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.9rem;outline:none;appearance:none;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:8px;border:none;font-family:'Instrument Sans',sans-serif;font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.15s;}
+.btn-green{background:var(--green);color:#fff;font-weight:600;}
+.btn-green:hover{background:#145f39;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text2);}
+.btn-outline:hover{border-color:var(--green);color:var(--green);background:var(--green-bg);}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:#9c2d22;}
+.btn-full{width:100%;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-row{display:flex;gap:8px;margin-top:10px;}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* WEBAUTHN */
+.wa-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;margin-bottom:10px;}
+.wa-bar.ok{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.wa-bar.warn{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);}
+.wa-bar.err{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}
+
+/* LOCATION */
+.loc-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--text2);margin-bottom:8px;}
+.loc-bar.got{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+
+/* HISTORY */
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.history-item:last-child{border-bottom:none;}
+.h-left{display:flex;align-items:center;gap:10px;}
+.h-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.h-action{font-size:0.875rem;font-weight:500;}
+.h-method{font-size:0.75rem;color:var(--text2);}
+.h-time{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--text2);}
+
+/* RESULT OVERLAY */
+.result-overlay{display:none;position:fixed;inset:0;background:rgba(245,244,240,0.92);backdrop-filter:blur(8px);z-index:300;align-items:center;justify-content:center;}
+.result-overlay.open{display:flex;}
+.result-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.1);animation:boxIn 0.25s ease;}
+@keyframes boxIn{from{opacity:0;transform:scale(0.93);}to{opacity:1;transform:scale(1);}}
+.res-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px;}
+.res-icon.ok{background:var(--green-bg);border:2px solid var(--green-border);}
+.res-icon.fail{background:var(--red-bg);border:2px solid var(--red-border);}
+.res-title{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;margin-bottom:4px;}
+.res-sub{color:var(--text2);font-size:0.85rem;margin-bottom:20px;}
+.res-detail{background:var(--surface2);border-radius:10px;padding:14px;text-align:left;margin-bottom:20px;}
+.res-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.res-row:last-child{margin-bottom:0;}
+.res-key{color:var(--text2);font-size:0.8rem;}
+.res-val{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;font-weight:500;}
+
+/* LOGIN */
+.attend-login{max-width:400px;margin:60px auto;}
+.login-title{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;margin-bottom:4px;}
+.login-title em{font-style:italic;color:var(--green);}
+.login-sub{color:var(--text2);font-size:0.875rem;margin-bottom:24px;}
+
+/* MY HOURS */
+.hours-bar{background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.hours-label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);}
+.hours-val{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;color:var(--green);}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:16px;}
+.tab{flex:1;padding:7px;border:none;border-radius:6px;background:transparent;color:var(--text2);font-family:'Instrument Sans',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.15s;font-weight:500;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+
+/* ALERT */
+.alert{padding:10px 14px;border-radius:8px;font-size:0.82rem;border:1px solid;margin-bottom:12px;display:flex;gap:8px;}
+.alert-info{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue);}
+.alert-warn{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);}
+
+.muted{color:var(--text2);}.mono{font-family:'IBM Plex Mono',monospace;}.text-sm{font-size:0.82rem;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}
+.flex{display:flex;}.gap-8{gap:8px;}.items-center{align-items:center;}.justify-between{justify-content:space-between;}
+
+@media(max-width:640px){.two-col{grid-template-columns:1fr;}.status-row{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="brand">Light <em>Check</em></div>
+    <div class="brand-tag">Attend</div>
+  </div>
+  <div class="top-right">
+    <div class="clock" id="clock">--:--:--</div>
+    <a href="admin.html" class="admin-link">Admin →</a>
+  </div>
+</div>
+
+<!-- CONTAINER -->
+<div class="container">
+
+  <!-- ── LOGIN VIEW ── -->
+  <div id="view-login">
+    <div class="attend-login">
+      <div class="login-title">Good to see you.<br/><em>Who are you?</em></div>
+      <div class="login-sub">Enter your Employee ID to access your attendance panel.</div>
+      <div class="fg">
+        <label class="fl">Employee ID</label>
+        <input class="fi" id="login-id" type="text" placeholder="EMP-0001" style="font-size:1rem;padding:12px 14px;"/>
+      </div>
+      <button class="btn btn-green btn-full mt-8" style="padding:12px;" onclick="employeeLogin()">Continue →</button>
+      <div class="alert alert-info mt-12" style="margin-top:12px;">
+        <span>ℹ</span> <span>Demo IDs: EMP-0001 through EMP-0005</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN VIEW ── -->
+  <div id="view-main" style="display:none;">
+
+    <!-- Identity card -->
+    <div class="id-card" id="id-card">
+      <div class="avatar" id="emp-avatar">?</div>
+      <div class="emp-info">
+        <div class="emp-name" id="emp-name">—</div>
+        <div class="emp-meta" id="emp-meta">—</div>
+      </div>
+      <div class="id-card-right">
+        <div class="shift-label">Shift</div>
+        <div class="shift-time" id="shift-time">09:00 – 17:00</div>
+      </div>
+    </div>
+
+    <!-- Today's hours bar -->
+    <div class="hours-bar">
+      <div>
+        <div class="hours-label">Hours today</div>
+        <div class="hours-val" id="today-hours">0.0h</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="hours-label">Status</div>
+        <div id="today-status" style="font-weight:600;color:var(--text2);font-size:0.875rem;">Not checked in</div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div class="two-col">
+
+      <!-- LEFT: Camera + Action -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">Face Recognition</div>
+          <div id="cam-wrap">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="canvas"></canvas>
+            <div class="cam-overlay">
+              <div class="face-ring"></div>
+              <div class="scan-bar"></div>
+            </div>
+            <div class="cam-live"><div class="live-dot"></div>LIVE</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-outline" style="flex:1;" onclick="startCamera()" id="btn-cam">Start Camera</button>
+            <button class="btn btn-green" style="flex:1;" onclick="captureAndCheckin()" id="btn-capture" disabled>Capture</button>
+          </div>
+          <div id="cam-msg" class="muted text-sm mt-8" style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;">Camera not started</div>
+        </div>
+
+        <div class="alert alert-info">
+          <span>🔬</span>
+          <div>Plug in <strong>AWS Rekognition FaceLiveness</strong> or <strong>Azure Face API</strong> inside <code>captureAndCheckin()</code> for real liveness verification.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Options + History -->
+      <div>
+        <div class="card mb-12" style="margin-bottom:16px;">
+          <div class="card-title">Action</div>
+          <div class="tabs">
+            <button class="tab active" id="tab-in"  onclick="setAction('check-in',this)">Check In</button>
+            <button class="tab"        id="tab-out" onclick="setAction('check-out',this)">Check Out</button>
+            <button class="tab"        id="tab-brk" onclick="setAction('break-start',this)">Break</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- WebAuthn -->
+          <div class="card-title">Device Biometrics</div>
+          <div class="wa-bar" id="wa-bar"><span>🔒</span><span id="wa-label">Checking…</span></div>
+          <div class="btn-row">
+            <button class="btn btn-outline" style="flex:1;font-size:0.8rem;" id="btn-reg-wa" onclick="registerBiometric()" disabled>Register</button>
+            <button class="btn btn-green"   style="flex:1;font-size:0.8rem;" id="btn-auth-wa" onclick="authenticateBiometric()" disabled>Use Biometric</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Location -->
+          <div class="card-title">Location</div>
+          <div class="loc-bar" id="loc-bar">📍 Not captured</div>
+          <button class="btn btn-outline btn-full" onclick="captureLocation()" style="margin-top:6px;">Capture GPS</button>
+
+          <div class="divider"></div>
+
+          <!-- Manual -->
+          <button class="btn btn-outline btn-full" onclick="manualCheckin()">Manual Check In/Out</button>
+        </div>
+
+        <!-- My History -->
+        <div class="card">
+          <div class="card-title">My History — Today</div>
+          <div id="my-history"><div class="muted text-sm">No events yet today.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sign out -->
+    <div style="margin-top:20px;text-align:center;">
+      <button class="btn btn-outline" onclick="signOut()" style="font-size:0.8rem;color:var(--text2);">← Switch Employee</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-box">
+    <div class="res-icon" id="res-icon">✓</div>
+    <div class="res-title" id="res-title">—</div>
+    <div class="res-sub"  id="res-sub">—</div>
+    <div class="res-detail">
+      <div class="res-row"><span class="res-key">Action</span><span class="res-val" id="res-action">—</span></div>
+      <div class="res-row"><span class="res-key">Time</span><span class="res-val" id="res-time">—</span></div>
+      <div class="res-row"><span class="res-key">Method</span><span class="res-val" id="res-method">—</span></div>
+      <div class="res-row"><span class="res-key">Location</span><span class="res-val" id="res-loc">—</span></div>
+    </div>
+    <button class="btn btn-green btn-full" onclick="closeResult()">Done</button>
+  </div>
+</div>
+
+<script>
+// ── SHARED STATE (same localStorage keys as admin) ──
+let employees = JSON.parse(localStorage.getItem('lc_employees') || '[]');
+let logs      = JSON.parse(localStorage.getItem('lc_logs')      || '[]');
+let settings  = JSON.parse(localStorage.getItem('lc_settings')  || '{"workStart":"09:00","workEnd":"17:00","lateThreshold":15}');
+
+// Seed employees if not seeded yet
+if (!employees.length) {
+  employees = [
+    {name:'Alice Chen',  id:'EMP-0001',dept:'Engineering',role:'Lead Engineer',   biometric:false,startOverride:''},
+    {name:'Ben Torres',  id:'EMP-0002',dept:'Design',      role:'UI Designer',     biometric:false,startOverride:''},
+    {name:'Chloe Park',  id:'EMP-0003',dept:'Marketing',   role:'Growth Manager',  biometric:false,startOverride:''},
+    {name:'David Osei',  id:'EMP-0004',dept:'HR',          role:'People Ops',      biometric:false,startOverride:''},
+    {name:'Eva Müller',  id:'EMP-0005',dept:'Finance',     role:'Finance Analyst', biometric:false,startOverride:''},
+  ];
+  localStorage.setItem('lc_employees', JSON.stringify(employees));
+}
+
+let currentEmp = null;
+let currentAction = 'check-in';
+let currentLocation = null;
+let credentialId = null;
+let stream = null;
+
+// ── CLOCK ──
+setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); },1000);
+
+// ── LOGIN ──
+function employeeLogin() {
+  const id = document.getElementById('login-id').value.trim().toUpperCase();
+  // Reload from storage in case admin added someone
+  employees = JSON.parse(localStorage.getItem('lc_employees')||'[]');
+  const emp = employees.find(e=>e.id===id);
+  if (!emp) { alert('Employee ID not found. Contact your admin.'); return; }
+  currentEmp = emp;
+  credentialId = localStorage.getItem('lc_cred_'+emp.id) || null;
+  document.getElementById('view-login').style.display = 'none';
+  document.getElementById('view-main').style.display = 'block';
+  loadEmpUI();
+}
+
+function loadEmpUI() {
+  const e = currentEmp;
+  document.getElementById('emp-avatar').textContent = e.name.split(' ').map(w=>w[0]).join('').substring(0,2);
+  document.getElementById('emp-name').textContent = e.name;
+  document.getElementById('emp-meta').textContent = e.id + ' · ' + e.dept + ' · ' + e.role;
+  const start = e.startOverride || settings.workStart || '09:00';
+  const end = settings.workEnd || '17:00';
+  document.getElementById('shift-time').textContent = start + ' – ' + end;
+  checkWebAuthn();
+  renderHistory();
+  updateHoursBar();
+}
+
+function signOut() {
+  currentEmp = null;
+  document.getElementById('view-login').style.display = 'block';
+  document.getElementById('view-main').style.display = 'none';
+  document.getElementById('login-id').value = '';
+  if (stream) { stream.getTracks().forEach(t=>t.stop()); stream=null; }
+}
+
+// ── ACTION TAB ──
+function setAction(action, el) {
+  currentAction = action;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── CAMERA ──
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    document.getElementById('video').srcObject = stream;
+    document.getElementById('btn-capture').disabled = false;
+    document.getElementById('cam-msg').textContent = '✓ Camera active — centre your face in the ring';
+    document.getElementById('cam-msg').style.color = 'var(--green)';
+  } catch(e) {
+    document.getElementById('cam-msg').textContent = '✗ Camera denied: ' + e.message;
+    document.getElementById('cam-msg').style.color = 'var(--red)';
+  }
+}
+
+function captureFrame() {
+  const v=document.getElementById('video'), c=document.getElementById('canvas');
+  c.width=v.videoWidth; c.height=v.videoHeight;
+  c.getContext('2d').drawImage(v,0,0);
+  return c.toDataURL('image/jpeg',0.8);
+}
+
+function captureAndCheckin() {
+  if (!currentEmp) return;
+  // ── INTEGRATION POINT ──
+  // const frame = captureFrame();
+  // const result = await callAWSRekognition(frame) or callAzureFaceAPI(frame);
+  // if (!result.isLive) { showResult(false,...); return; }
+  recordLog('Face Recognition', true);
+}
+
+// ── MANUAL ──
+function manualCheckin() {
+  if (!currentEmp) return;
+  recordLog('Manual', true);
+}
+
+// ── LOG ──
+function recordLog(method, success) {
+  // Reload logs from storage (admin may have cleared)
+  logs = JSON.parse(localStorage.getItem('lc_logs')||'[]');
+  const entry = {
+    empName: currentEmp.name,
+    empId:   currentEmp.id,
+    action:  currentAction,
+    time:    new Date().toISOString(),
+    method,
+    success,
+    location: currentLocation || 'Not captured',
+  };
+  logs.unshift(entry);
+  localStorage.setItem('lc_logs', JSON.stringify(logs));
+  showResult(success, entry);
+  renderHistory();
+  updateHoursBar();
+}
+
+// ── RESULT ──
+function showResult(success, entry) {
+  const icon = document.getElementById('res-icon');
+  icon.className = 'res-icon ' + (success?'ok':'fail');
+  icon.textContent = success ? '✓' : '✗';
+  const labels = {'check-in':'Checked In','check-out':'Checked Out','break-start':'Break Started','break-end':'Break Ended'};
+  document.getElementById('res-title').textContent = success ? (labels[entry.action]||entry.action) : 'Failed';
+  document.getElementById('res-sub').textContent   = success ? 'Your attendance has been recorded.' : 'Something went wrong. Try again.';
+  document.getElementById('res-action').textContent  = labels[entry.action]||entry.action;
+  document.getElementById('res-time').textContent    = new Date(entry.time).toLocaleTimeString();
+  document.getElementById('res-method').textContent  = entry.method;
+  document.getElementById('res-loc').textContent     = entry.location;
+  document.getElementById('result-overlay').classList.add('open');
+}
+function closeResult() { document.getElementById('result-overlay').classList.remove('open'); }
+
+// ── HISTORY ──
+function renderHistory() {
+  logs = JSON.parse(localStorage.getItem('lc_logs')||'[]');
+  const today = new Date().toDateString();
+  const mine = logs.filter(l=>l.empId===currentEmp.id && new Date(l.time).toDateString()===today);
+  const el = document.getElementById('my-history');
+  if (!mine.length) { el.innerHTML='<div class="muted text-sm">No events yet today.</div>'; return; }
+  const colors = {'check-in':'var(--green)','check-out':'var(--red)','break-start':'var(--amber)','break-end':'var(--blue)'};
+  const labels = {'check-in':'Check In','check-out':'Check Out','break-start':'Break Start','break-end':'Break End'};
+  el.innerHTML = mine.map(l=>`
+    <div class="history-item">
+      <div class="h-left">
+        <div class="h-dot" style="background:${colors[l.action]||'#999'};"></div>
+        <div>
+          <div class="h-action">${labels[l.action]||l.action}</div>
+          <div class="h-method">${l.method}</div>
+        </div>
+      </div>
+      <div class="h-time">${new Date(l.time).toLocaleTimeString()}</div>
+    </div>
+  `).join('');
+}
+
+// ── HOURS BAR ──
+function updateHoursBar() {
+  logs = JSON.parse(localStorage.getItem('lc_logs')||'[]');
+  const today = new Date().toDateString();
+  const mine = logs.filter(l=>l.empId===currentEmp.id&&l.success&&new Date(l.time).toDateString()===today);
+  const checkIns  = mine.filter(l=>l.action==='check-in');
+  const checkOuts = mine.filter(l=>l.action==='check-out');
+  let ms=0;
+  checkIns.forEach(ci=>{ const co=checkOuts.find(c=>new Date(c.time)>new Date(ci.time)); if(co) ms+=new Date(co.time)-new Date(ci.time); });
+  // If currently checked in, count up to now
+  if (checkIns.length > checkOuts.length) ms += Date.now() - new Date(checkIns[checkIns.length-1].time);
+  document.getElementById('today-hours').textContent = (ms/3600000).toFixed(1)+'h';
+
+  const isIn = mine.some(l=>l.action==='check-in') && checkIns.length > checkOuts.length;
+  const isBreak = mine.some(l=>l.action==='break-start') && mine.filter(l=>l.action==='break-start').length > mine.filter(l=>l.action==='break-end').length;
+  const statusEl = document.getElementById('today-status');
+  if (isBreak) { statusEl.textContent='On break'; statusEl.style.color='var(--amber)'; }
+  else if (isIn) { statusEl.textContent='Checked in'; statusEl.style.color='var(--green)'; }
+  else if (checkOuts.length) { statusEl.textContent='Checked out'; statusEl.style.color='var(--text2)'; }
+  else { statusEl.textContent='Not checked in'; statusEl.style.color='var(--text2)'; }
+}
+
+// ── WEBAUTHN ──
+async function checkWebAuthn() {
+  const bar = document.getElementById('wa-bar');
+  const label = document.getElementById('wa-label');
+  if (!window.PublicKeyCredential) {
+    bar.className='wa-bar err'; label.textContent='WebAuthn not supported in this browser'; return;
+  }
+  const avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  if (avail) {
+    bar.className='wa-bar ok';
+    label.textContent = credentialId ? '✓ Biometric registered — ready to use' : 'Device biometrics available — register below';
+    document.getElementById('btn-reg-wa').disabled=false;
+    document.getElementById('btn-auth-wa').disabled=!credentialId;
+  } else {
+    bar.className='wa-bar warn';
+    label.textContent='No platform authenticator (Touch ID / Face ID) found';
+  }
+}
+
+async function registerBiometric() {
+  try {
+    const challenge=new Uint8Array(32); crypto.getRandomValues(challenge);
+    const userId=new TextEncoder().encode(currentEmp.id);
+    const cred = await navigator.credentials.create({publicKey:{
+      challenge, rp:{name:'Light Check',id:location.hostname||'localhost'},
+      user:{id:userId,name:currentEmp.id,displayName:currentEmp.name},
+      pubKeyCredParams:[{type:'public-key',alg:-7}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+      timeout:60000,
+    }});
+    credentialId=btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+    localStorage.setItem('lc_cred_'+currentEmp.id, credentialId);
+    // Mark employee as biometric-enabled in shared storage
+    employees = JSON.parse(localStorage.getItem('lc_employees')||'[]');
+    const emp = employees.find(e=>e.id===currentEmp.id);
+    if (emp) { emp.biometric=true; localStorage.setItem('lc_employees',JSON.stringify(employees)); }
+    document.getElementById('btn-auth-wa').disabled=false;
+    document.getElementById('wa-bar').className='wa-bar ok';
+    document.getElementById('wa-label').textContent='✓ Biometric registered!';
+    alert('Biometric registered successfully!');
+  } catch(e) { alert('Registration failed: '+e.message); }
+}
+
+async function authenticateBiometric() {
+  if (!credentialId) { alert('No biometric registered yet.'); return; }
+  try {
+    const challenge=new Uint8Array(32); crypto.getRandomValues(challenge);
+    const rawId=Uint8Array.from(atob(credentialId),c=>c.charCodeAt(0));
+    await navigator.credentials.get({publicKey:{
+      challenge, rpId:location.hostname||'localhost',
+      allowCredentials:[{type:'public-key',id:rawId}],
+      userVerification:'required', timeout:60000,
+    }});
+    // ── PRODUCTION: verify assertion server-side ──
+    recordLog('WebAuthn Biometric', true);
+  } catch(e) { alert('Biometric auth failed: '+e.message); }
+}
+
+// ── GPS ──
+async function captureLocation() {
+  const bar = document.getElementById('loc-bar');
+  bar.textContent = '📡 Acquiring GPS…';
+  if (!navigator.geolocation) { bar.textContent='Geolocation not supported'; return; }
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    currentLocation=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    bar.textContent='📍 '+currentLocation; bar.className='loc-bar got';
+    try {
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const d=await r.json();
+      const a=d.address;
+      const label=[a.road,a.city||a.town||a.village,a.country].filter(Boolean).join(', ');
+      currentLocation=label; bar.textContent='📍 '+label;
+    } catch(e){}
+  }, err=>{ bar.textContent='✗ Location denied: '+err.message; bar.className='loc-bar'; });
+}
+</script>
+</body>
+</html>

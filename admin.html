@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Light Check — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2128;
+  --border: #30363d;
+  --accent: #3fb950;
+  --accent-dim: rgba(63,185,80,0.12);
+  --blue: #58a6ff;
+  --blue-dim: rgba(88,166,255,0.12);
+  --orange: #f78166;
+  --orange-dim: rgba(247,129,102,0.12);
+  --yellow: #e3b341;
+  --yellow-dim: rgba(227,179,65,0.12);
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --text3: #484f58;
+  --radius: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+.sidebar-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.brand-name{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;letter-spacing:-0.3px;}
+.brand-name em{font-style:italic;color:var(--accent);}
+.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
+
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-section{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:2px;color:var(--text3);padding:12px 20px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:0.875rem;color:var(--text2);transition:all 0.15s;border:none;background:transparent;width:100%;text-align:left;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:500;}
+.nav-item .icon{font-size:1rem;width:18px;text-align:center;}
+
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.admin-chip{display:flex;align-items:center;gap:8px;font-size:0.8rem;}
+.admin-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;color:#fff;}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg);position:sticky;top:0;z-index:40;}
+.topbar-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.clock{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--text2);}
+.live-badge{display:flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:20px;border:1px solid rgba(63,185,80,0.2);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.content{padding:24px;flex:1;}
+.page{display:none;}
+.page.active{display:block;animation:fadeUp 0.25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* PAGE HEADER */
+.ph{margin-bottom:20px;}
+.ph-title{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;letter-spacing:-0.5px;}
+.ph-sub{color:var(--text2);font-size:0.85rem;margin-top:2px;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.card-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:12px;}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat.g::after{background:var(--accent);}
+.stat.b::after{background:var(--blue);}
+.stat.o::after{background:var(--orange);}
+.stat.y::after{background:var(--yellow);}
+.stat-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);}
+.stat-val{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;line-height:1.1;margin:4px 0 2px;}
+.stat-val.g{color:var(--accent);}
+.stat-val.b{color:var(--blue);}
+.stat-val.o{color:var(--orange);}
+.stat-val.y{color:var(--yellow);}
+.stat-desc{font-size:0.75rem;color:var(--text2);}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--surface2);}
+th{padding:10px 14px;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:500;white-space:nowrap;}
+td{padding:10px 14px;border-top:1px solid var(--border);font-size:0.855rem;vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:0.72rem;font-family:'IBM Plex Mono',monospace;font-weight:500;white-space:nowrap;}
+.bg{background:var(--accent-dim);color:var(--accent);}
+.bb{background:var(--blue-dim);color:var(--blue);}
+.bo{background:var(--orange-dim);color:var(--orange);}
+.by{background:var(--yellow-dim);color:var(--yellow);}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.fg{margin-bottom:12px;}
+.fl{display:block;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin-bottom:5px;}
+.fi{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.875rem;outline:none;transition:border-color 0.15s;}
+.fi:focus{border-color:var(--blue);}
+.fsel{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.875rem;outline:none;appearance:none;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;font-family:'Instrument Sans',sans-serif;font-size:0.855rem;font-weight:500;cursor:pointer;transition:all 0.15s;text-decoration:none;}
+.btn-green{background:var(--accent);color:#0d1117;font-weight:600;}
+.btn-green:hover{filter:brightness(1.1);}
+.btn-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(88,166,255,0.2);}
+.btn-blue:hover{background:rgba(88,166,255,0.2);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-danger{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(247,129,102,0.2);}
+.btn-danger:hover{background:rgba(247,129,102,0.2);}
+.btn-sm{padding:5px 10px;font-size:0.78rem;}
+.btn-full{width:100%;}
+
+/* MODAL */
+.modal-bd{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+.modal-bd.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:460px;animation:mIn 0.2s ease;}
+@keyframes mIn{from{opacity:0;transform:scale(0.96);}to{opacity:1;transform:scale(1);}}
+.modal-title{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;margin-bottom:4px;}
+.modal-sub{color:var(--text2);font-size:0.82rem;margin-bottom:20px;}
+
+/* LAYOUT UTILS */
+.flex{display:flex;}.gap-8{gap:8px;}.gap-12{gap:12px;}.items-center{align-items:center;}.justify-between{justify-content:space-between;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}.mt-20{margin-top:20px;}
+.mb-12{margin-bottom:12px;}.mb-16{margin-bottom:16px;}.mb-20{margin-bottom:20px;}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;}.muted{color:var(--text2);}
+.text-sm{font-size:0.82rem;}.divider{height:1px;background:var(--border);margin:16px 0;}
+.text-center{text-align:center;}
+.alert{padding:10px 14px;border-radius:6px;font-size:0.82rem;border:1px solid;margin-bottom:12px;}
+.alert-warn{background:var(--yellow-dim);border-color:rgba(227,179,65,0.3);color:var(--yellow);}
+.alert-info{background:var(--blue-dim);border-color:rgba(88,166,255,0.2);color:var(--blue);}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
+.login-box{width:360px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;}
+.login-logo{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;margin-bottom:4px;}
+.login-logo em{font-style:italic;color:var(--accent);}
+.login-role{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:24px;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Light <em>Check</em></div>
+    <div class="login-role">Admin Portal</div>
+    <div class="fg">
+      <label class="fl">Username</label>
+      <input class="fi" id="login-user" type="text" placeholder="admin" value="admin"/>
+    </div>
+    <div class="fg">
+      <label class="fl">Password</label>
+      <input class="fi" id="login-pass" type="password" placeholder="••••••••" value="admin123"/>
+    </div>
+    <div class="alert alert-info mt-8" style="margin-top:12px;">Demo credentials: <strong>admin / admin123</strong></div>
+    <button class="btn btn-green btn-full mt-12" onclick="doLogin()" style="margin-top:12px;padding:10px;">Sign In</button>
+    <div class="muted text-sm text-center mt-8" style="margin-top:12px;">
+      Employee? <a href="attend.html" style="color:var(--blue);text-decoration:none;">Go to Check In →</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">Light <em>Check</em></div>
+    <div class="brand-tag">Admin Console</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <button class="nav-item active" onclick="showPage('dashboard',this)">
+      <span class="icon">▦</span> Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('live',this)">
+      <span class="icon">◉</span> Live Feed
+    </button>
+    <div class="nav-section">People</div>
+    <button class="nav-item" onclick="showPage('employees',this)">
+      <span class="icon">◈</span> Employees
+    </button>
+    <button class="nav-item" onclick="showPage('devices',this)">
+      <span class="icon">⬡</span> Devices
+    </button>
+    <div class="nav-section">Data</div>
+    <button class="nav-item" onclick="showPage('reports',this)">
+      <span class="icon">◧</span> Reports
+    </button>
+    <button class="nav-item" onclick="showPage('settings',this)">
+      <span class="icon">◌</span> Settings
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-chip">
+      <div class="admin-avatar">A</div>
+      <div>
+        <div style="font-size:0.82rem;font-weight:500;">Admin</div>
+        <div class="muted" style="font-size:0.72rem;">Super user</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-label">Dashboard</div>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="ph">
+        <div class="ph-title">Good morning, Admin</div>
+        <div class="ph-sub" id="dash-date">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat g"><div class="stat-label">Present</div><div class="stat-val g" id="s-present">0</div><div class="stat-desc">Checked in today</div></div>
+        <div class="stat o"><div class="stat-label">Absent</div><div class="stat-val o" id="s-absent">0</div><div class="stat-desc">Not yet arrived</div></div>
+        <div class="stat b"><div class="stat-label">On Break</div><div class="stat-val b" id="s-break">0</div><div class="stat-desc">Currently on break</div></div>
+        <div class="stat y"><div class="stat-label">Late</div><div class="stat-val y" id="s-late">0</div><div class="stat-desc">After work start</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Today's Activity</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>ID</th><th>Action</th><th>Time</th><th>Method</th><th>Location</th><th>Status</th></tr></thead>
+            <tbody id="dash-log"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LIVE FEED ══ -->
+    <div class="page" id="page-live">
+      <div class="ph"><div class="ph-title">Live Feed</div><div class="ph-sub">Real-time check-in stream</div></div>
+      <div class="card">
+        <div class="flex justify-between items-center mb-12">
+          <div class="card-title" style="margin:0;">All Events — Latest First</div>
+          <button class="btn btn-danger btn-sm" onclick="clearLogs()">Clear Logs</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>ID</th><th>Dept</th><th>Action</th><th>Date</th><th>Time</th><th>Method</th><th>Location</th></tr></thead>
+            <tbody id="live-log"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EMPLOYEES ══ -->
+    <div class="page" id="page-employees">
+      <div class="flex justify-between items-center mb-16">
+        <div class="ph" style="margin:0;"><div class="ph-title">Employees</div><div class="ph-sub">Manage your team</div></div>
+        <button class="btn btn-green" onclick="openAddEmp()">+ Add Employee</button>
+      </div>
+      <div class="card mb-12">
+        <div class="flex gap-8">
+          <input class="fi" style="flex:1;" type="text" placeholder="Search by name or ID…" oninput="filterEmployees(this.value)"/>
+          <select class="fsel" style="width:160px;" onchange="filterDept(this.value)" id="dept-filter">
+            <option value="">All Departments</option>
+            <option>Engineering</option><option>Design</option><option>Marketing</option>
+            <option>HR</option><option>Finance</option><option>Operations</option>
+          </select>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>ID</th><th>Department</th><th>Role</th><th>Check-In Time</th><th>Biometric</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="emp-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ DEVICES ══ -->
+    <div class="page" id="page-devices">
+      <div class="flex justify-between items-center mb-16">
+        <div class="ph" style="margin:0;"><div class="ph-title">Devices</div><div class="ph-sub">Registered attendance terminals</div></div>
+        <button class="btn btn-green" onclick="openAddDevice()">+ Register Device</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Token</th><th>Type</th><th>Location</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="device-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div class="page" id="page-reports">
+      <div class="ph"><div class="ph-title">Reports</div><div class="ph-sub">Attendance analytics &amp; exports</div></div>
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Date Range</div>
+          <div class="fg"><label class="fl">From</label><input class="fi" type="date" id="rep-from"/></div>
+          <div class="fg"><label class="fl">To</label><input class="fi" type="date" id="rep-to"/></div>
+          <button class="btn btn-green btn-full" onclick="renderReports()">Generate</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Export</div>
+          <div class="flex" style="flex-direction:column;gap:8px;margin-top:4px;">
+            <button class="btn btn-ghost btn-full" onclick="exportCSV()">Export CSV</button>
+            <button class="btn btn-ghost btn-full" onclick="exportJSON()">Export JSON</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title mb-12">Employee Summary</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>Dept</th><th>Days Present</th><th>Days Absent</th><th>Total Hours</th><th>Late Arrivals</th><th>Avg Check-In</th></tr></thead>
+            <tbody id="rep-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="page-settings">
+      <div class="ph"><div class="ph-title">Settings</div><div class="ph-sub">Configure Light Check</div></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Work Schedule</div>
+          <div class="fg mt-8"><label class="fl">Work Start</label><input class="fi" type="time" id="set-start" value="09:00"/></div>
+          <div class="fg"><label class="fl">Work End</label><input class="fi" type="time" id="set-end" value="17:00"/></div>
+          <div class="fg"><label class="fl">Late threshold (minutes)</label><input class="fi" type="number" id="set-late" value="15"/></div>
+          <button class="btn btn-green" onclick="saveSettings()">Save</button>
+        </div>
+        <div class="card">
+          <div class="card-title">API Integrations</div>
+          <div class="alert alert-warn">Keys saved to localStorage — use environment variables in production.</div>
+          <div class="fg"><label class="fl">AWS Rekognition Region</label><input class="fi" type="text" id="set-aws" placeholder="us-east-1"/></div>
+          <div class="fg"><label class="fl">Azure Face API Endpoint</label><input class="fi" type="text" id="set-azure" placeholder="https://…cognitiveservices.azure.com"/></div>
+          <div class="fg"><label class="fl">Supabase URL</label><input class="fi" type="text" id="set-sb-url" placeholder="https://xxx.supabase.co"/></div>
+          <div class="fg"><label class="fl">Supabase Anon Key</label><input class="fi" type="password" id="set-sb-key" placeholder="eyJ…"/></div>
+          <button class="btn btn-blue btn-full" onclick="saveAPIKeys()">Save API Config</button>
+        </div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-title">Admin Password</div>
+        <div class="form-row mt-8">
+          <div class="fg" style="margin:0;"><label class="fl">New Password</label><input class="fi" type="password" id="new-pass" placeholder="••••••••"/></div>
+          <div class="fg" style="margin:0;"><label class="fl">Confirm Password</label><input class="fi" type="password" id="conf-pass" placeholder="••••••••"/></div>
+        </div>
+        <button class="btn btn-ghost mt-8" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL: Add Employee -->
+<div class="modal-bd" id="modal-emp">
+  <div class="modal">
+    <div class="modal-title">Add Employee</div>
+    <div class="modal-sub">Register a new team member in Light Check</div>
+    <div class="form-row">
+      <div class="fg" style="margin:0;"><label class="fl">Full Name</label><input class="fi" id="ne-name" placeholder="Jane Smith"/></div>
+      <div class="fg" style="margin:0;"><label class="fl">Employee ID</label><input class="fi" id="ne-id" placeholder="EMP-0001"/></div>
+    </div>
+    <div class="form-row mt-8">
+      <div class="fg" style="margin:0;"><label class="fl">Department</label>
+        <select class="fsel" id="ne-dept">
+          <option>Engineering</option><option>Design</option><option>Marketing</option>
+          <option>HR</option><option>Finance</option><option>Operations</option>
+        </select>
+      </div>
+      <div class="fg" style="margin:0;"><label class="fl">Role</label><input class="fi" id="ne-role" placeholder="Senior Engineer"/></div>
+    </div>
+    <div class="fg mt-8"><label class="fl">Work Start Override (optional)</label><input class="fi" type="time" id="ne-start"/></div>
+    <div class="flex gap-8 mt-16">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-emp')">Cancel</button>
+      <button class="btn btn-green" style="flex:1" onclick="addEmployee()">Add Employee</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Device -->
+<div class="modal-bd" id="modal-device">
+  <div class="modal">
+    <div class="modal-title">Register Device</div>
+    <div class="modal-sub">Add a new attendance terminal</div>
+    <div class="fg"><label class="fl">Device Name</label><input class="fi" id="nd-name" placeholder="Reception Kiosk"/></div>
+    <div class="fg"><label class="fl">Location / Room</label><input class="fi" id="nd-loc" placeholder="Main Lobby"/></div>
+    <div class="fg"><label class="fl">Type</label>
+      <select class="fsel" id="nd-type">
+        <option>Kiosk</option><option>Mobile</option><option>Desktop</option><option>Tablet</option>
+      </select>
+    </div>
+    <div class="alert alert-info mt-8">A unique token will be generated automatically.</div>
+    <div class="flex gap-8 mt-12">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-device')">Cancel</button>
+      <button class="btn btn-green" style="flex:1" onclick="addDevice()">Register</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let employees = JSON.parse(localStorage.getItem('lc_employees') || '[]');
+let logs      = JSON.parse(localStorage.getItem('lc_logs')      || '[]');
+let devices   = JSON.parse(localStorage.getItem('lc_devices')   || '[]');
+let settings  = JSON.parse(localStorage.getItem('lc_settings')  || '{"workStart":"09:00","workEnd":"17:00","lateThreshold":15}');
+let adminPass = localStorage.getItem('lc_admin_pass') || 'admin123';
+
+// seed employees
+if (!employees.length) {
+  employees = [
+    {name:'Alice Chen',   id:'EMP-0001', dept:'Engineering', role:'Lead Engineer',    biometric:false, startOverride:''},
+    {name:'Ben Torres',   id:'EMP-0002', dept:'Design',       role:'UI Designer',      biometric:false, startOverride:''},
+    {name:'Chloe Park',   id:'EMP-0003', dept:'Marketing',    role:'Growth Manager',   biometric:false, startOverride:''},
+    {name:'David Osei',   id:'EMP-0004', dept:'HR',           role:'People Ops',       biometric:false, startOverride:''},
+    {name:'Eva Müller',   id:'EMP-0005', dept:'Finance',      role:'Finance Analyst',  biometric:false, startOverride:''},
+  ];
+  saveEmp();
+}
+
+function saveEmp()     { localStorage.setItem('lc_employees', JSON.stringify(employees)); }
+function saveLogs()    { localStorage.setItem('lc_logs',      JSON.stringify(logs)); }
+function saveDevices() { localStorage.setItem('lc_devices',   JSON.stringify(devices)); }
+
+// ── CLOCK ──
+setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+
+// ── LOGIN ──
+function doLogin() {
+  const u = document.getElementById('login-user').value;
+  const p = document.getElementById('login-pass').value;
+  if (u === 'admin' && p === adminPass) {
+    document.getElementById('login-screen').style.display = 'none';
+    renderDash(); renderEmpTable(); renderDevices(); renderReports();
+    document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  } else alert('Invalid credentials');
+}
+
+// ── NAV ──
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbar-label').textContent = el.textContent.trim();
+  if (id==='dashboard') renderDash();
+  if (id==='live') renderLive();
+  if (id==='employees') renderEmpTable();
+  if (id==='devices') renderDevices();
+  if (id==='reports') renderReports();
+}
+
+// ── DASHBOARD ──
+function renderDash() {
+  const today = new Date().toDateString();
+  const tl = logs.filter(l=>new Date(l.time).toDateString()===today && l.success);
+  const checkedIn = new Set(tl.filter(l=>l.action==='check-in').map(l=>l.empId));
+  const breaks = new Set(tl.filter(l=>l.action==='break-start').map(l=>l.empId));
+  const breakEnded = new Set(tl.filter(l=>l.action==='break-end').map(l=>l.empId));
+  const [sh,sm] = settings.workStart.split(':').map(Number);
+  const late = new Set(tl.filter(l=>{
+    if(l.action!=='check-in') return false;
+    const t=new Date(l.time); return t.getHours()>sh||(t.getHours()===sh&&t.getMinutes()>sm+Number(settings.lateThreshold));
+  }).map(l=>l.empId));
+  document.getElementById('s-present').textContent = checkedIn.size;
+  document.getElementById('s-absent').textContent = Math.max(0, employees.length - checkedIn.size);
+  document.getElementById('s-break').textContent = [...breaks].filter(id=>!breakEnded.has(id)).length;
+  document.getElementById('s-late').textContent = late.size;
+  renderTable('dash-log', logs.filter(l=>new Date(l.time).toDateString()===today));
+}
+
+// ── LIVE ──
+function renderLive() { renderTable('live-log', logs, true); }
+
+function renderTable(tbodyId, data, showDate=false) {
+  const tbody = document.getElementById(tbodyId);
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="muted text-center" style="padding:28px;">No events yet.</td></tr>`;
+    return;
+  }
+  const actionBadge = a => ({
+    'check-in':'<span class="badge bg">↑ In</span>',
+    'check-out':'<span class="badge bo">↓ Out</span>',
+    'break-start':'<span class="badge by">⏸ Break</span>',
+    'break-end':'<span class="badge bb">▶ Resume</span>',
+  }[a] || a);
+
+  tbody.innerHTML = data.slice(0,100).map(l=>{
+    const emp = employees.find(e=>e.id===l.empId)||{dept:'—'};
+    const t = new Date(l.time);
+    return `<tr>
+      <td>${l.empName}</td>
+      <td class="mono muted">${l.empId}</td>
+      ${showDate?`<td>${emp.dept}</td>`:''}
+      <td>${actionBadge(l.action)}</td>
+      ${showDate?`<td class="mono" style="font-size:0.78rem;">${t.toLocaleDateString()}</td>`:''}
+      <td class="mono" style="font-size:0.78rem;">${t.toLocaleTimeString()}</td>
+      <td>${l.method}</td>
+      <td class="mono muted" style="font-size:0.75rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;">${l.location||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function clearLogs() {
+  if (!confirm('Clear ALL logs? This cannot be undone.')) return;
+  logs = []; saveLogs(); renderLive(); renderDash();
+}
+
+// ── EMPLOYEES ──
+let empSearch='', empDept='';
+function filterEmployees(v){ empSearch=v.toLowerCase(); renderEmpTable(); }
+function filterDept(v){ empDept=v; renderEmpTable(); }
+
+function renderEmpTable() {
+  let list = employees.filter(e=>{
+    const matchS = !empSearch || e.name.toLowerCase().includes(empSearch) || e.id.toLowerCase().includes(empSearch);
+    const matchD = !empDept || e.dept===empDept;
+    return matchS && matchD;
+  });
+  const tbody = document.getElementById('emp-table');
+  if (!list.length) { tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">No employees found.</td></tr>`; return; }
+
+  tbody.innerHTML = list.map(e=>{
+    const todayLogs = logs.filter(l=>l.empId===e.id&&l.action==='check-in'&&l.success&&new Date(l.time).toDateString()===new Date().toDateString());
+    const lastIn = todayLogs.length ? new Date(todayLogs[todayLogs.length-1].time).toLocaleTimeString() : '—';
+    return `<tr>
+      <td><strong>${e.name}</strong></td>
+      <td class="mono" style="font-size:0.78rem;">${e.id}</td>
+      <td>${e.dept}</td>
+      <td class="muted text-sm">${e.role}</td>
+      <td class="mono" style="font-size:0.78rem;">${lastIn}</td>
+      <td>${e.biometric?'<span class="badge bg">✓ Yes</span>':'<span class="badge bo">None</span>'}</td>
+      <td><span class="badge bg">Active</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeEmp('${e.id}')">Remove</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddEmp() { document.getElementById('modal-emp').classList.add('open'); }
+function addEmployee() {
+  const name=document.getElementById('ne-name').value.trim();
+  const id=document.getElementById('ne-id').value.trim();
+  const dept=document.getElementById('ne-dept').value;
+  const role=document.getElementById('ne-role').value.trim();
+  const startOverride=document.getElementById('ne-start').value;
+  if(!name||!id){alert('Name and ID required.');return;}
+  if(employees.find(e=>e.id===id)){alert('ID already exists.');return;}
+  employees.push({name,id,dept,role,biometric:false,startOverride});
+  saveEmp(); closeModal('modal-emp'); renderEmpTable();
+}
+function removeEmp(id) {
+  if(!confirm('Remove this employee?')) return;
+  employees = employees.filter(e=>e.id!==id);
+  saveEmp(); renderEmpTable();
+}
+
+// ── DEVICES ──
+function renderDevices() {
+  const tbody = document.getElementById('device-table');
+  if (!devices.length) { tbody.innerHTML=`<tr><td colspan="7" class="muted text-center" style="padding:28px;">No devices registered.</td></tr>`; return; }
+  tbody.innerHTML = devices.map(d=>`<tr>
+    <td><strong>${d.name}</strong></td>
+    <td class="mono" style="font-size:0.75rem;">${d.token}</td>
+    <td>${d.type}</td>
+    <td>${d.location}</td>
+    <td class="mono muted" style="font-size:0.75rem;">${new Date(d.registered).toLocaleDateString()}</td>
+    <td><span class="badge bg">Online</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeDevice('${d.token}')">Remove</button></td>
+  </tr>`).join('');
+}
+function openAddDevice() { document.getElementById('modal-device').classList.add('open'); }
+function addDevice() {
+  const name=document.getElementById('nd-name').value.trim();
+  const loc=document.getElementById('nd-loc').value.trim();
+  const type=document.getElementById('nd-type').value;
+  if(!name){alert('Device name required.');return;}
+  const token='LC-'+Math.random().toString(36).substr(2,8).toUpperCase();
+  devices.push({name,token,type,location:loc,registered:new Date().toISOString()});
+  saveDevices(); closeModal('modal-device'); renderDevices();
+}
+function removeDevice(token) {
+  if(!confirm('Remove device?')) return;
+  devices=devices.filter(d=>d.token!==token);
+  saveDevices(); renderDevices();
+}
+
+// ── REPORTS ──
+function renderReports() {
+  const tbody = document.getElementById('rep-table');
+  const [sh,sm] = settings.workStart.split(':').map(Number);
+  tbody.innerHTML = employees.map(emp=>{
+    const el = logs.filter(l=>l.empId===emp.id&&l.success);
+    const checkIns = el.filter(l=>l.action==='check-in');
+    const checkOuts = el.filter(l=>l.action==='check-out');
+    const days = new Set(checkIns.map(l=>new Date(l.time).toDateString())).size;
+    let ms=0;
+    checkIns.forEach(ci=>{ const co=checkOuts.find(co=>new Date(co.time)>new Date(ci.time)); if(co) ms+=new Date(co.time)-new Date(ci.time); });
+    const hrs=(ms/3600000).toFixed(1);
+    const late=checkIns.filter(l=>{const t=new Date(l.time);return t.getHours()>sh||(t.getHours()===sh&&t.getMinutes()>sm+Number(settings.lateThreshold));}).length;
+    const avg=checkIns.length?(()=>{const m=checkIns.reduce((a,l)=>{const t=new Date(l.time);return a+t.getHours()*60+t.getMinutes();},0)/checkIns.length;return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(Math.round(m%60)).padStart(2,'0')}`;})():'—';
+    return `<tr><td>${emp.name}</td><td class="muted text-sm">${emp.dept}</td><td>${days}</td><td>${Math.max(0,5-days)}</td><td>${hrs}h</td><td>${late?`<span class="badge by">${late}</span>`:'0'}</td><td class="mono" style="font-size:0.78rem;">${avg}</td></tr>`;
+  }).join('') || `<tr><td colspan="7" class="muted text-center" style="padding:28px;">No data.</td></tr>`;
+}
+function exportCSV() {
+  const h=['Employee','ID','Action','Time','Method','Location','Success'];
+  const rows=logs.map(l=>[l.empName,l.empId,l.action,l.time,l.method,l.location||'',l.success]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='lightcheck-logs.csv';a.click();
+}
+function exportJSON() {
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(logs,null,2)],{type:'application/json'}));a.download='lightcheck-logs.json';a.click();
+}
+
+// ── SETTINGS ──
+function saveSettings(){
+  settings.workStart=document.getElementById('set-start').value;
+  settings.workEnd=document.getElementById('set-end').value;
+  settings.lateThreshold=document.getElementById('set-late').value;
+  localStorage.setItem('lc_settings',JSON.stringify(settings));
+  alert('Settings saved.');
+}
+function saveAPIKeys(){
+  ['aws','azure','sb-url','sb-key'].forEach(k=>localStorage.setItem('lc_'+k,document.getElementById('set-'+k).value));
+  alert('API config saved.');
+}
+function changePassword(){
+  const np=document.getElementById('new-pass').value;
+  const cp=document.getElementById('conf-pass').value;
+  if(!np){alert('Enter a new password.');return;}
+  if(np!==cp){alert('Passwords do not match.');return;}
+  adminPass=np; localStorage.setItem('lc_admin_pass',np);
+  alert('Password updated.');
+}
+
+// ── MODAL ──
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bd').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+
+// Load saved settings
+document.getElementById('set-start').value=settings.workStart||'09:00';
+document.getElementById('set-end').value=settings.workEnd||'17:00';
+document.getElementById('set-late').value=settings.lateThreshold||15;
+</script>
+</body>
+</html>
