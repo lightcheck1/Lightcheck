@@ -1,48 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Light Check — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --surface2: #1c2128;
-  --border: #30363d;
-  --accent: #3fb950;
-  --accent-dim: rgba(63,185,80,0.12);
-  --blue: #58a6ff;
-  --blue-dim: rgba(88,166,255,0.12);
-  --orange: #f78166;
-  --orange-dim: rgba(247,129,102,0.12);
-  --yellow: #e3b341;
-  --yellow-dim: rgba(227,179,65,0.12);
-  --text: #e6edf3;
-  --text2: #8b949e;
-  --text3: #484f58;
-  --radius: 8px;
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;
+  --accent:#3fb950;--accent-dim:rgba(63,185,80,0.12);
+  --blue:#58a6ff;--blue-dim:rgba(88,166,255,0.12);
+  --orange:#f78166;--orange-dim:rgba(247,129,102,0.12);
+  --yellow:#e3b341;--yellow-dim:rgba(227,179,65,0.12);
+  --purple:#bc8cff;--purple-dim:rgba(188,140,255,0.12);
+  --text:#e6edf3;--text2:#8b949e;--text3:#484f58;--radius:8px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;display:flex;}
 
 /* SIDEBAR */
-.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;}
 .sidebar-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
-.brand-name{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;letter-spacing:-0.3px;}
+.brand-name{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;}
 .brand-name em{font-style:italic;color:var(--accent);}
 .brand-tag{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
-
-.sidebar-nav{padding:12px 0;flex:1;}
+.sidebar-nav{padding:12px 0;flex:1;overflow-y:auto;}
 .nav-section{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:2px;color:var(--text3);padding:12px 20px 6px;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:0.875rem;color:var(--text2);transition:all 0.15s;border:none;background:transparent;width:100%;text-align:left;}
 .nav-item:hover{background:var(--surface2);color:var(--text);}
 .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:500;}
 .nav-item .icon{font-size:1rem;width:18px;text-align:center;}
-
 .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
-.admin-chip{display:flex;align-items:center;gap:8px;font-size:0.8rem;}
+.admin-chip{display:flex;align-items:center;gap:8px;}
 .admin-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;color:#fff;}
 
 /* MAIN */
@@ -69,7 +58,7 @@ body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-s
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
 .card-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:12px;}
 
-/* STAT ROW */
+/* STATS */
 .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;}
 .stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
@@ -99,9 +88,15 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .bb{background:var(--blue-dim);color:var(--blue);}
 .bo{background:var(--orange-dim);color:var(--orange);}
 .by{background:var(--yellow-dim);color:var(--yellow);}
+.bp{background:var(--purple-dim);color:var(--purple);}
+
+/* TOKEN DISPLAY */
+.token-display{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;margin:16px 0;}
+.token-value{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--accent);letter-spacing:4px;margin-bottom:8px;}
+.token-hint{font-size:0.78rem;color:var(--text2);}
 
 /* FORMS */
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fg{margin-bottom:12px;}
 .fl{display:block;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin-bottom:5px;}
 .fi{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.875rem;outline:none;transition:border-color 0.15s;}
@@ -109,7 +104,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .fsel{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.875rem;outline:none;appearance:none;}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;font-family:'Instrument Sans',sans-serif;font-size:0.855rem;font-weight:500;cursor:pointer;transition:all 0.15s;text-decoration:none;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;font-family:'Instrument Sans',sans-serif;font-size:0.855rem;font-weight:500;cursor:pointer;transition:all 0.15s;}
 .btn-green{background:var(--accent);color:#0d1117;font-weight:600;}
 .btn-green:hover{filter:brightness(1.1);}
 .btn-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(88,166,255,0.2);}
@@ -117,29 +112,24 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
 .btn-ghost:hover{background:var(--surface2);color:var(--text);}
 .btn-danger{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(247,129,102,0.2);}
-.btn-danger:hover{background:rgba(247,129,102,0.2);}
+.btn-danger:hover{background:rgba(247,129,102,0.25);}
 .btn-sm{padding:5px 10px;font-size:0.78rem;}
 .btn-full{width:100%;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* CONF BAR */
+.conf-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:4px;}
+.conf-fill{height:100%;border-radius:2px;}
+.conf-high{background:var(--accent);}
+.conf-low{background:var(--orange);}
 
 /* MODAL */
-.modal-bd{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+.modal-bd{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
 .modal-bd.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:460px;animation:mIn 0.2s ease;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:500px;animation:mIn 0.2s ease;max-height:90vh;overflow-y:auto;}
 @keyframes mIn{from{opacity:0;transform:scale(0.96);}to{opacity:1;transform:scale(1);}}
 .modal-title{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;margin-bottom:4px;}
 .modal-sub{color:var(--text2);font-size:0.82rem;margin-bottom:20px;}
-
-/* LAYOUT UTILS */
-.flex{display:flex;}.gap-8{gap:8px;}.gap-12{gap:12px;}.items-center{align-items:center;}.justify-between{justify-content:space-between;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}.mt-20{margin-top:20px;}
-.mb-12{margin-bottom:12px;}.mb-16{margin-bottom:16px;}.mb-20{margin-bottom:20px;}
-.mono{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;}.muted{color:var(--text2);}
-.text-sm{font-size:0.82rem;}.divider{height:1px;background:var(--border);margin:16px 0;}
-.text-center{text-align:center;}
-.alert{padding:10px 14px;border-radius:6px;font-size:0.82rem;border:1px solid;margin-bottom:12px;}
-.alert-warn{background:var(--yellow-dim);border-color:rgba(227,179,65,0.3);color:var(--yellow);}
-.alert-info{background:var(--blue-dim);border-color:rgba(88,166,255,0.2);color:var(--blue);}
 
 /* LOGIN */
 .login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
@@ -148,10 +138,114 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .login-logo em{font-style:italic;color:var(--accent);}
 .login-role{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:24px;}
 
-/* SCROLLBAR */
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:6px;font-size:0.82rem;border:1px solid;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;}
+.alert-warn{background:var(--yellow-dim);border-color:rgba(227,179,65,0.3);color:var(--yellow);}
+.alert-info{background:var(--blue-dim);border-color:rgba(88,166,255,0.2);color:var(--blue);}
+.alert-success{background:var(--accent-dim);border-color:rgba(63,185,80,0.3);color:var(--accent);}
+
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.2);border-top-color:#0d1117;border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* UTILS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.flex{display:flex;}.gap-8{gap:8px;}.gap-12{gap:12px;}.items-center{align-items:center;}.justify-between{justify-content:space-between;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}.mt-20{margin-top:20px;}
+.mb-12{margin-bottom:12px;}.mb-16{margin-bottom:16px;}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;}.muted{color:var(--text2);}
+.text-sm{font-size:0.82rem;}.divider{height:1px;background:var(--border);margin:16px 0;}
+.text-center{text-align:center;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* NOTIFICATIONS */
+.notif-btn{position:relative;background:transparent;border:1px solid var(--border);border-radius:6px;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--text2);font-size:1rem;transition:all 0.15s;}
+.notif-btn:hover{background:var(--surface2);color:var(--text);}
+.notif-badge{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;
+  background:var(--orange);color:#fff;font-size:0.6rem;font-weight:700;display:flex;
+  align-items:center;justify-content:center;border:2px solid var(--bg);}
+.notif-dropdown{display:none;position:absolute;top:44px;right:0;width:320px;background:var(--surface);
+  border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:200;overflow:hidden;}
+.notif-dropdown.open{display:block;}
+.notif-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notif-header-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);}
+.notif-clear{background:transparent;border:none;color:var(--text3);font-size:0.72rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;}
+.notif-clear:hover{color:var(--text2);}
+.notif-list{max-height:280px;overflow-y:auto;}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread{background:rgba(247,129,102,0.05);}
+.notif-icon{width:32px;height:32px;border-radius:50%;background:var(--orange-dim);display:flex;
+  align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+.notif-info{flex:1;}
+.notif-name{font-size:0.85rem;font-weight:500;margin-bottom:2px;}
+.notif-msg{font-size:0.75rem;color:var(--text2);}
+.notif-time{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text3);margin-top:3px;}
+.notif-empty{padding:32px 16px;text-align:center;color:var(--text3);font-size:0.82rem;}
+.notif-wrap{position:relative;}
+
+/* HAMBURGER */
+.hamburger{display:none;background:transparent;border:1px solid var(--border);border-radius:6px;
+  width:34px;height:34px;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--text2);font-size:1.1rem;flex-shrink:0;}
+
+/* SIDEBAR OVERLAY */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:49;backdrop-filter:blur(2px);}
+.sidebar-overlay.open{display:block;}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 900px) {
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (max-width: 768px) {
+  /* Sidebar becomes an overlay */
+  .sidebar{transform:translateX(-240px);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+
+  /* Topbar */
+  .topbar{padding:0 16px;}
+  .topbar-title{font-size:0.9rem;}
+  .clock{display:none;}
+
+  /* Content */
+  .content{padding:16px;}
+
+  /* Stats 2 columns */
+  .stat-row{grid-template-columns:repeat(2,1fr);gap:10px;}
+
+  /* Grids to single column */
+  .grid-2{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+
+  /* Login box */
+  .login-box{width:calc(100% - 40px);max-width:360px;padding:24px 20px;}
+
+  /* Modal */
+  .modal{max-width:calc(100vw - 32px);padding:20px;}
+  .modal-bd{padding:16px;}
+
+  /* Notification dropdown */
+  .notif-dropdown{right:-40px;width:290px;}
+
+  /* Page header row */
+  .flex.justify-between.items-center.mb-16{flex-wrap:wrap;gap:10px;}
+  .ph{margin:0;}
+  .ph-title{font-size:1.2rem;}
+}
+
+@media (max-width: 480px) {
+  .stat-row{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:1.6rem;}
+  .topbar-right .live-badge{display:none;}
+  .content{padding:12px;}
+}
 </style>
 </head>
 <body>
@@ -160,504 +254,773 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo">Light <em>Check</em></div>
-    <div class="login-role">Admin Portal</div>
+    <div class="login-role">Console Administrateur</div>
     <div class="fg">
-      <label class="fl">Username</label>
+      <label class="fl">Identifiant</label>
       <input class="fi" id="login-user" type="text" placeholder="admin" value="admin"/>
     </div>
     <div class="fg">
-      <label class="fl">Password</label>
-      <input class="fi" id="login-pass" type="password" placeholder="••••••••" value="admin123"/>
+      <label class="fl">Mot de passe</label>
+      <input class="fi" id="login-pass" type="password" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') doLogin()"/>
     </div>
-    <div class="alert alert-info mt-8" style="margin-top:12px;">Demo credentials: <strong>admin / admin123</strong></div>
-    <button class="btn btn-green btn-full mt-12" onclick="doLogin()" style="margin-top:12px;padding:10px;">Sign In</button>
-    <div class="muted text-sm text-center mt-8" style="margin-top:12px;">
-      Employee? <a href="attend.html" style="color:var(--blue);text-decoration:none;">Go to Check In →</a>
+    <div id="login-err" class="alert alert-warn" style="display:none;margin-top:8px;">
+      <span>⚠</span><span>Identifiants incorrects.</span>
+    </div>
+    <div class="alert alert-info" style="margin-top:12px;">
+      <span>ℹ</span><span>Démo : <strong>admin / admin123</strong></span>
+    </div>
+    <button class="btn btn-green btn-full" onclick="doLogin()" style="margin-top:12px;padding:10px;">Se connecter</button>
+    <div class="muted text-sm text-center" style="margin-top:14px;">
+      Employé ? <a href="attend.html" style="color:var(--blue);text-decoration:none;">Aller au pointage →</a>
     </div>
   </div>
 </div>
 
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">Light <em>Check</em></div>
-    <div class="brand-tag">Admin Console</div>
+    <div class="brand-tag">Console Admin</div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section">Overview</div>
-    <button class="nav-item active" onclick="showPage('dashboard',this)">
-      <span class="icon">▦</span> Dashboard
-    </button>
-    <button class="nav-item" onclick="showPage('live',this)">
-      <span class="icon">◉</span> Live Feed
-    </button>
-    <div class="nav-section">People</div>
-    <button class="nav-item" onclick="showPage('employees',this)">
-      <span class="icon">◈</span> Employees
-    </button>
-    <button class="nav-item" onclick="showPage('devices',this)">
-      <span class="icon">⬡</span> Devices
-    </button>
-    <div class="nav-section">Data</div>
-    <button class="nav-item" onclick="showPage('reports',this)">
-      <span class="icon">◧</span> Reports
-    </button>
-    <button class="nav-item" onclick="showPage('settings',this)">
-      <span class="icon">◌</span> Settings
-    </button>
+    <div class="nav-section">Vue d'ensemble</div>
+    <button class="nav-item active" onclick="showPage('dashboard',this);closeSidebar()"><span class="icon">▦</span> Tableau de bord</button>
+    <button class="nav-item" onclick="showPage('live',this);closeSidebar()"><span class="icon">◉</span> Flux en direct</button>
+    <div class="nav-section">Personnes</div>
+    <button class="nav-item" onclick="showPage('employees',this);closeSidebar()"><span class="icon">◈</span> Employés</button>
+    <div class="nav-section">Rapports</div>
+    <button class="nav-item" onclick="showPage('pointages',this);closeSidebar()"><span class="icon">◧</span> Pointages</button>
+    <div class="nav-section">Configuration</div>
+    <button class="nav-item" onclick="showPage('settings',this);closeSidebar()"><span class="icon">◌</span> Paramètres</button>
   </nav>
   <div class="sidebar-footer">
-    <div class="admin-chip">
+    <div class="admin-chip" style="margin-bottom:10px;">
       <div class="admin-avatar">A</div>
       <div>
-        <div style="font-size:0.82rem;font-weight:500;">Admin</div>
-        <div class="muted" style="font-size:0.72rem;">Super user</div>
+        <div style="font-size:0.82rem;font-weight:500;">Administrateur</div>
+        <div class="muted" style="font-size:0.72rem;">Super utilisateur</div>
       </div>
     </div>
+    <button class="btn btn-ghost btn-full" style="font-size:0.78rem;" onclick="adminLogout()">↩ Déconnexion</button>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbar-label">Dashboard</div>
+    <div class="flex items-center gap-8">
+      <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbar-label">Tableau de bord</div>
+    </div>
     <div class="topbar-right">
-      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="live-badge"><div class="live-dot"></div>LIVE · Supabase</div>
       <div class="clock" id="clock">--:--:--</div>
+      <div class="notif-wrap">
+        <button class="notif-btn" id="notif-btn" onclick="toggleNotifications()" title="Notifications">
+          🔔
+          <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+        </button>
+        <div class="notif-dropdown" id="notif-dropdown">
+          <div class="notif-header">
+            <div class="notif-header-title">Notifications</div>
+            <button class="notif-clear" onclick="clearNotifications()">Tout marquer lu</button>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <div class="notif-empty">Aucune notification</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- ══ DASHBOARD ══ -->
+    <!-- ══ TABLEAU DE BORD ══ -->
     <div class="page active" id="page-dashboard">
       <div class="ph">
-        <div class="ph-title">Good morning, Admin</div>
+        <div class="ph-title">Bonjour, Admin</div>
         <div class="ph-sub" id="dash-date">—</div>
       </div>
       <div class="stat-row">
-        <div class="stat g"><div class="stat-label">Present</div><div class="stat-val g" id="s-present">0</div><div class="stat-desc">Checked in today</div></div>
-        <div class="stat o"><div class="stat-label">Absent</div><div class="stat-val o" id="s-absent">0</div><div class="stat-desc">Not yet arrived</div></div>
-        <div class="stat b"><div class="stat-label">On Break</div><div class="stat-val b" id="s-break">0</div><div class="stat-desc">Currently on break</div></div>
-        <div class="stat y"><div class="stat-label">Late</div><div class="stat-val y" id="s-late">0</div><div class="stat-desc">After work start</div></div>
+        <div class="stat g"><div class="stat-label">Présents</div><div class="stat-val g" id="s-present">—</div><div class="stat-desc">Entrée aujourd'hui</div></div>
+        <div class="stat o"><div class="stat-label">Absents</div><div class="stat-val o" id="s-absent">—</div><div class="stat-desc">Pas encore pointés</div></div>
+        <div class="stat b"><div class="stat-label">Pointages</div><div class="stat-val b" id="s-total">—</div><div class="stat-desc">Total du jour</div></div>
+        <div class="stat y"><div class="stat-label">Confiance moy.</div><div class="stat-val y" id="s-conf">—</div><div class="stat-desc">Score Face++ moyen</div></div>
       </div>
-      <div class="card">
-        <div class="card-title">Today's Activity</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Employee</th><th>ID</th><th>Action</th><th>Time</th><th>Method</th><th>Location</th><th>Status</th></tr></thead>
-            <tbody id="dash-log"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ LIVE FEED ══ -->
-    <div class="page" id="page-live">
-      <div class="ph"><div class="ph-title">Live Feed</div><div class="ph-sub">Real-time check-in stream</div></div>
       <div class="card">
         <div class="flex justify-between items-center mb-12">
-          <div class="card-title" style="margin:0;">All Events — Latest First</div>
-          <button class="btn btn-danger btn-sm" onclick="clearLogs()">Clear Logs</button>
+          <div class="card-title" style="margin:0;">Activité du jour</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Actualiser</button>
         </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Employee</th><th>ID</th><th>Dept</th><th>Action</th><th>Date</th><th>Time</th><th>Method</th><th>Location</th></tr></thead>
-            <tbody id="live-log"></tbody>
-          </table>
-        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Employé</th><th>Type</th><th>Heure</th><th>Confiance</th><th>GPS</th><th>Statut</th></tr></thead>
+          <tbody id="dash-log"></tbody>
+        </table></div>
       </div>
     </div>
 
-    <!-- ══ EMPLOYEES ══ -->
+    <!-- ══ FLUX EN DIRECT ══ -->
+    <div class="page" id="page-live">
+      <div class="flex justify-between items-center mb-16">
+        <div class="ph" style="margin:0;"><div class="ph-title">Flux en direct</div><div class="ph-sub">Tous les pointages en temps réel</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadLive()">↻ Actualiser</button>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Employé</th><th>Poste</th><th>Type</th><th>Date</th><th>Heure</th><th>Confiance</th><th>GPS</th><th>Statut</th></tr></thead>
+          <tbody id="live-log"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ EMPLOYÉS ══ -->
     <div class="page" id="page-employees">
       <div class="flex justify-between items-center mb-16">
-        <div class="ph" style="margin:0;"><div class="ph-title">Employees</div><div class="ph-sub">Manage your team</div></div>
-        <button class="btn btn-green" onclick="openAddEmp()">+ Add Employee</button>
+        <div class="ph" style="margin:0;"><div class="ph-title">Employés</div><div class="ph-sub">Gestion de l'équipe</div></div>
+        <button class="btn btn-green" onclick="openAddEmployee()">+ Nouvel employé</button>
       </div>
-      <div class="card mb-12">
+
+      <!-- Search bar -->
+      <div class="card mb-12" style="margin-bottom:12px;">
         <div class="flex gap-8">
-          <input class="fi" style="flex:1;" type="text" placeholder="Search by name or ID…" oninput="filterEmployees(this.value)"/>
-          <select class="fsel" style="width:160px;" onchange="filterDept(this.value)" id="dept-filter">
-            <option value="">All Departments</option>
-            <option>Engineering</option><option>Design</option><option>Marketing</option>
-            <option>HR</option><option>Finance</option><option>Operations</option>
+          <input class="fi" style="flex:1;" type="text" placeholder="Rechercher par nom, poste…" oninput="filterEmp(this.value)"/>
+          <select class="fsel" style="width:180px;" onchange="filterEmpStatus(this.value)">
+            <option value="">Tous les statuts</option>
+            <option value="actif">Actif</option>
+            <option value="inactif">Inactif</option>
           </select>
         </div>
       </div>
+
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Name</th><th>ID</th><th>Department</th><th>Role</th><th>Check-In Time</th><th>Biometric</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Nom complet</th><th>Poste</th><th>Email</th><th>Token d'accès</th><th>Visage</th><th>Statut</th><th>Actions</th></tr></thead>
           <tbody id="emp-table"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ══ DEVICES ══ -->
-    <div class="page" id="page-devices">
-      <div class="flex justify-between items-center mb-16">
-        <div class="ph" style="margin:0;"><div class="ph-title">Devices</div><div class="ph-sub">Registered attendance terminals</div></div>
-        <button class="btn btn-green" onclick="openAddDevice()">+ Register Device</button>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Name</th><th>Token</th><th>Type</th><th>Location</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="device-table"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══ REPORTS ══ -->
-    <div class="page" id="page-reports">
-      <div class="ph"><div class="ph-title">Reports</div><div class="ph-sub">Attendance analytics &amp; exports</div></div>
-      <div class="grid-2 mb-16">
+    <!-- ══ POINTAGES ══ -->
+    <div class="page" id="page-pointages">
+      <div class="ph"><div class="ph-title">Rapport de pointages</div><div class="ph-sub">Historique complet depuis Supabase</div></div>
+      <div class="grid-2 mb-16" style="margin-bottom:16px;">
         <div class="card">
-          <div class="card-title">Date Range</div>
-          <div class="fg"><label class="fl">From</label><input class="fi" type="date" id="rep-from"/></div>
-          <div class="fg"><label class="fl">To</label><input class="fi" type="date" id="rep-to"/></div>
-          <button class="btn btn-green btn-full" onclick="renderReports()">Generate</button>
+          <div class="card-title">Filtrer</div>
+          <div class="fg mt-8"><label class="fl">Du</label><input class="fi" type="date" id="rep-from"/></div>
+          <div class="fg"><label class="fl">Au</label><input class="fi" type="date" id="rep-to"/></div>
+          <button class="btn btn-green btn-full" onclick="loadPointages()">Générer</button>
         </div>
         <div class="card">
-          <div class="card-title">Export</div>
-          <div class="flex" style="flex-direction:column;gap:8px;margin-top:4px;">
-            <button class="btn btn-ghost btn-full" onclick="exportCSV()">Export CSV</button>
-            <button class="btn btn-ghost btn-full" onclick="exportJSON()">Export JSON</button>
+          <div class="card-title">Exporter</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+            <button class="btn btn-ghost btn-full" onclick="exportCSV()">Exporter en CSV</button>
+            <button class="btn btn-ghost btn-full" onclick="exportJSON()">Exporter en JSON</button>
           </div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title mb-12">Employee Summary</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Employee</th><th>Dept</th><th>Days Present</th><th>Days Absent</th><th>Total Hours</th><th>Late Arrivals</th><th>Avg Check-In</th></tr></thead>
-            <tbody id="rep-table"></tbody>
-          </table>
-        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Employé</th><th>Type</th><th>Date</th><th>Heure</th><th>Confiance</th><th>Latitude</th><th>Longitude</th><th>Statut</th></tr></thead>
+          <tbody id="rep-table"></tbody>
+        </table></div>
       </div>
     </div>
 
-    <!-- ══ SETTINGS ══ -->
+    <!-- ══ PARAMÈTRES ══ -->
     <div class="page" id="page-settings">
-      <div class="ph"><div class="ph-title">Settings</div><div class="ph-sub">Configure Light Check</div></div>
+      <div class="ph"><div class="ph-title">Paramètres</div><div class="ph-sub">Configuration de Light Check</div></div>
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">Work Schedule</div>
-          <div class="fg mt-8"><label class="fl">Work Start</label><input class="fi" type="time" id="set-start" value="09:00"/></div>
-          <div class="fg"><label class="fl">Work End</label><input class="fi" type="time" id="set-end" value="17:00"/></div>
-          <div class="fg"><label class="fl">Late threshold (minutes)</label><input class="fi" type="number" id="set-late" value="15"/></div>
-          <button class="btn btn-green" onclick="saveSettings()">Save</button>
+          <div class="card-title">Face++ API</div>
+          <div class="alert alert-warn mt-8">Clés stockées en localStorage. Utilisez des variables d'environnement en production.</div>
+          <div class="fg mt-8"><label class="fl">API Key</label><input class="fi" type="text" id="set-facepp-key" placeholder="Votre Face++ API Key"/></div>
+          <div class="fg"><label class="fl">API Secret</label><input class="fi" type="password" id="set-facepp-secret" placeholder="Votre Face++ API Secret"/></div>
+          <div class="fg"><label class="fl">Seuil de confiance (%)</label><input class="fi" type="number" id="set-threshold" value="80" min="50" max="99"/></div>
+          <button class="btn btn-green" onclick="saveFaceppKeys()">Enregistrer</button>
         </div>
         <div class="card">
-          <div class="card-title">API Integrations</div>
-          <div class="alert alert-warn">Keys saved to localStorage — use environment variables in production.</div>
-          <div class="fg"><label class="fl">AWS Rekognition Region</label><input class="fi" type="text" id="set-aws" placeholder="us-east-1"/></div>
-          <div class="fg"><label class="fl">Azure Face API Endpoint</label><input class="fi" type="text" id="set-azure" placeholder="https://…cognitiveservices.azure.com"/></div>
-          <div class="fg"><label class="fl">Supabase URL</label><input class="fi" type="text" id="set-sb-url" placeholder="https://xxx.supabase.co"/></div>
-          <div class="fg"><label class="fl">Supabase Anon Key</label><input class="fi" type="password" id="set-sb-key" placeholder="eyJ…"/></div>
-          <button class="btn btn-blue btn-full" onclick="saveAPIKeys()">Save API Config</button>
+          <div class="card-title">Connexion Supabase</div>
+          <div class="alert alert-info mt-8">URL et clé anon configurées dans le code.</div>
+          <div class="fg mt-8">
+            <label class="fl">URL Supabase</label>
+            <input class="fi" type="text" value="https://cokuyebjlkuolwpwizko.supabase.co" readonly style="opacity:0.5;cursor:not-allowed;"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Statut</label>
+            <div id="sb-status" class="badge bg" style="display:inline-flex;margin-top:4px;">◉ Connecté</div>
+          </div>
+          <button class="btn btn-blue btn-full mt-8" onclick="testSupabase()">Tester la connexion</button>
         </div>
       </div>
       <div class="card mt-16">
-        <div class="card-title">Admin Password</div>
+        <div class="card-title">Mot de passe administrateur</div>
         <div class="form-row mt-8">
-          <div class="fg" style="margin:0;"><label class="fl">New Password</label><input class="fi" type="password" id="new-pass" placeholder="••••••••"/></div>
-          <div class="fg" style="margin:0;"><label class="fl">Confirm Password</label><input class="fi" type="password" id="conf-pass" placeholder="••••••••"/></div>
+          <div class="fg" style="margin:0;"><label class="fl">Nouveau mot de passe</label><input class="fi" type="password" id="new-pass" placeholder="••••••••"/></div>
+          <div class="fg" style="margin:0;"><label class="fl">Confirmer</label><input class="fi" type="password" id="conf-pass" placeholder="••••••••"/></div>
         </div>
-        <button class="btn btn-ghost mt-8" onclick="changePassword()">Update Password</button>
+        <button class="btn btn-ghost mt-8" onclick="changePassword()">Mettre à jour</button>
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
+  </div>
+</div>
 
-<!-- MODAL: Add Employee -->
-<div class="modal-bd" id="modal-emp">
+<!-- ══ MODAL : NOUVEL EMPLOYÉ ══ -->
+<div class="modal-bd" id="modal-employee">
   <div class="modal">
-    <div class="modal-title">Add Employee</div>
-    <div class="modal-sub">Register a new team member in Light Check</div>
+    <div class="modal-title">Nouvel employé</div>
+    <div class="modal-sub">Remplissez le profil. Un code d'accès unique sera généré automatiquement.</div>
+
     <div class="form-row">
-      <div class="fg" style="margin:0;"><label class="fl">Full Name</label><input class="fi" id="ne-name" placeholder="Jane Smith"/></div>
-      <div class="fg" style="margin:0;"><label class="fl">Employee ID</label><input class="fi" id="ne-id" placeholder="EMP-0001"/></div>
+      <div class="fg" style="margin:0 0 12px;"><label class="fl">Nom complet *</label><input class="fi" id="ne-name" placeholder="ex : Koffi Mensah"/></div>
+      <div class="fg" style="margin:0 0 12px;"><label class="fl">Poste *</label><input class="fi" id="ne-post" placeholder="ex : Comptable"/></div>
     </div>
-    <div class="form-row mt-8">
-      <div class="fg" style="margin:0;"><label class="fl">Department</label>
-        <select class="fsel" id="ne-dept">
-          <option>Engineering</option><option>Design</option><option>Marketing</option>
-          <option>HR</option><option>Finance</option><option>Operations</option>
-        </select>
+    <div class="form-row">
+      <div class="fg" style="margin:0 0 12px;"><label class="fl">Email</label><input class="fi" id="ne-email" type="email" placeholder="koffi@societe.com"/></div>
+      <div class="fg" style="margin:0 0 12px;"><label class="fl">Téléphone</label><input class="fi" id="ne-phone" type="tel" placeholder="+229 00 00 00 00"/></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Statut</label>
+      <select class="fsel" id="ne-status">
+        <option value="actif">Actif</option>
+        <option value="inactif">Inactif</option>
+      </select>
+    </div>
+
+    <div id="ne-result" style="display:none;">
+      <div class="divider"></div>
+      <div class="alert alert-success"><span>✓</span><span>Employé créé avec succès ! Partagez ce code d'accès avec l'employé.</span></div>
+      <div class="token-display">
+        <div class="card-title" style="margin-bottom:8px;">Code d'accès généré</div>
+        <div class="token-value" id="ne-token-display">—</div>
+        <div class="token-hint">L'employé utilise ce code pour se connecter à l'application de pointage.<br/>Il sera invité à prendre un selfie lors de sa première connexion.</div>
       </div>
-      <div class="fg" style="margin:0;"><label class="fl">Role</label><input class="fi" id="ne-role" placeholder="Senior Engineer"/></div>
+      <button class="btn btn-ghost btn-full" onclick="copyToken()">📋 Copier le code</button>
     </div>
-    <div class="fg mt-8"><label class="fl">Work Start Override (optional)</label><input class="fi" type="time" id="ne-start"/></div>
-    <div class="flex gap-8 mt-16">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-emp')">Cancel</button>
-      <button class="btn btn-green" style="flex:1" onclick="addEmployee()">Add Employee</button>
+
+    <div id="ne-error" class="alert alert-warn" style="display:none;margin-top:12px;">
+      <span>⚠</span><span id="ne-error-msg">Erreur.</span>
+    </div>
+
+    <div class="flex gap-8 mt-16" id="ne-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-employee')">Annuler</button>
+      <button class="btn btn-green" style="flex:1" id="btn-create-emp" onclick="createEmployee()">
+        <span id="btn-create-label">Créer l'employé</span>
+      </button>
+    </div>
+    <div id="ne-close-btn" style="display:none;margin-top:12px;">
+      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-employee');loadEmployees();">Fermer</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Add Device -->
-<div class="modal-bd" id="modal-device">
-  <div class="modal">
-    <div class="modal-title">Register Device</div>
-    <div class="modal-sub">Add a new attendance terminal</div>
-    <div class="fg"><label class="fl">Device Name</label><input class="fi" id="nd-name" placeholder="Reception Kiosk"/></div>
-    <div class="fg"><label class="fl">Location / Room</label><input class="fi" id="nd-loc" placeholder="Main Lobby"/></div>
-    <div class="fg"><label class="fl">Type</label>
-      <select class="fsel" id="nd-type">
-        <option>Kiosk</option><option>Mobile</option><option>Desktop</option><option>Tablet</option>
-      </select>
+<!-- ══ MODAL : TOKEN ══ -->
+<div class="modal-bd" id="modal-token">
+  <div class="modal" style="max-width:400px;text-align:center;">
+    <div class="modal-title">Code d'accès</div>
+    <div class="modal-sub" id="mt-emp-name">—</div>
+    <div class="token-display">
+      <div class="token-value" id="mt-token">—</div>
+      <div class="token-hint">Partagez ce code avec l'employé pour lui permettre de se connecter.</div>
     </div>
-    <div class="alert alert-info mt-8">A unique token will be generated automatically.</div>
-    <div class="flex gap-8 mt-12">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-device')">Cancel</button>
-      <button class="btn btn-green" style="flex:1" onclick="addDevice()">Register</button>
-    </div>
+    <button class="btn btn-ghost btn-full" onclick="copyTokenFromModal()" style="margin-bottom:8px;">📋 Copier</button>
+    <button class="btn btn-ghost btn-full" onclick="closeModal('modal-token')">Fermer</button>
   </div>
 </div>
 
 <script>
-// ── STATE ──
-let employees = JSON.parse(localStorage.getItem('lc_employees') || '[]');
-let logs      = JSON.parse(localStorage.getItem('lc_logs')      || '[]');
-let devices   = JSON.parse(localStorage.getItem('lc_devices')   || '[]');
-let settings  = JSON.parse(localStorage.getItem('lc_settings')  || '{"workStart":"09:00","workEnd":"17:00","lateThreshold":15}');
+// ══ CONFIG ══
+const SUPABASE_URL = 'https://cokuyebjlkuolwpwizko.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNva3V5ZWJqbGt1b2x3cHdpemtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzI5ODEsImV4cCI6MjA5NDk0ODk4MX0.PbKN4yz8wem8NisRp3ZXHcQrwG0iK1e-QyLNJEgSdJU';
 let adminPass = localStorage.getItem('lc_admin_pass') || 'admin123';
+let allEmployees = [];
+let empSearchVal = '', empStatusVal = '';
+let cachedPointages = [];
+let generatedToken = '';
 
-// seed employees
-if (!employees.length) {
-  employees = [
-    {name:'Alice Chen',   id:'EMP-0001', dept:'Engineering', role:'Lead Engineer',    biometric:false, startOverride:''},
-    {name:'Ben Torres',   id:'EMP-0002', dept:'Design',       role:'UI Designer',      biometric:false, startOverride:''},
-    {name:'Chloe Park',   id:'EMP-0003', dept:'Marketing',    role:'Growth Manager',   biometric:false, startOverride:''},
-    {name:'David Osei',   id:'EMP-0004', dept:'HR',           role:'People Ops',       biometric:false, startOverride:''},
-    {name:'Eva Müller',   id:'EMP-0005', dept:'Finance',      role:'Finance Analyst',  biometric:false, startOverride:''},
-  ];
-  saveEmp();
+// ══ SUPABASE ══
+async function sbGet(table, filters='') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}`, {
+    headers:{ apikey:SUPABASE_KEY, Authorization:'Bearer '+SUPABASE_KEY }
+  });
+  return r.json();
+}
+async function sbInsert(table, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method:'POST',
+    headers:{ apikey:SUPABASE_KEY, Authorization:'Bearer '+SUPABASE_KEY,
+              'Content-Type':'application/json', Prefer:'return=representation' },
+    body: JSON.stringify(data)
+  });
+  return r.json();
+}
+async function sbPatch(table, filter, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    method:'PATCH',
+    headers:{ apikey:SUPABASE_KEY, Authorization:'Bearer '+SUPABASE_KEY,
+              'Content-Type':'application/json', Prefer:'return=representation' },
+    body: JSON.stringify(data)
+  });
+  return r.json();
 }
 
-function saveEmp()     { localStorage.setItem('lc_employees', JSON.stringify(employees)); }
-function saveLogs()    { localStorage.setItem('lc_logs',      JSON.stringify(logs)); }
-function saveDevices() { localStorage.setItem('lc_devices',   JSON.stringify(devices)); }
+// ══ TOKEN GENERATOR ══
+function generateToken() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let t = 'LC-';
+  for (let i=0;i<6;i++) t += chars[Math.floor(Math.random()*chars.length)];
+  return t;
+}
 
-// ── CLOCK ──
-setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+// ══ CLOCK ══
+setInterval(()=>{ document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR'); },1000);
 
-// ── LOGIN ──
+// ══ LOGIN ══
+function enterAdmin(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dash-date').textContent =
+    new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  loadDashboard();
+  loadSettings();
+  const t = new Date().toISOString().split('T')[0];
+  document.getElementById('rep-from').value = t;
+  document.getElementById('rep-to').value   = t;
+  startNotifPolling();
+}
+
 function doLogin() {
   const u = document.getElementById('login-user').value;
   const p = document.getElementById('login-pass').value;
-  if (u === 'admin' && p === adminPass) {
-    document.getElementById('login-screen').style.display = 'none';
-    renderDash(); renderEmpTable(); renderDevices(); renderReports();
-    document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  } else alert('Invalid credentials');
+  if (u==='admin' && p===adminPass) {
+    localStorage.setItem('lc_admin_session','1');
+    enterAdmin();
+  } else {
+    document.getElementById('login-err').style.display='flex';
+  }
 }
 
-// ── NAV ──
+// Auto-login if admin session exists
+window.addEventListener('load', ()=>{
+  if(localStorage.getItem('lc_admin_session')==='1'){
+    enterAdmin();
+  }
+});
+
+// ══ NAV ══
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   el.classList.add('active');
   document.getElementById('topbar-label').textContent = el.textContent.trim();
-  if (id==='dashboard') renderDash();
-  if (id==='live') renderLive();
-  if (id==='employees') renderEmpTable();
-  if (id==='devices') renderDevices();
-  if (id==='reports') renderReports();
+  if (id==='dashboard') loadDashboard();
+  if (id==='live')      loadLive();
+  if (id==='employees') loadEmployees();
+  if (id==='pointages') loadPointages();
 }
 
-// ── DASHBOARD ──
-function renderDash() {
-  const today = new Date().toDateString();
-  const tl = logs.filter(l=>new Date(l.time).toDateString()===today && l.success);
-  const checkedIn = new Set(tl.filter(l=>l.action==='check-in').map(l=>l.empId));
-  const breaks = new Set(tl.filter(l=>l.action==='break-start').map(l=>l.empId));
-  const breakEnded = new Set(tl.filter(l=>l.action==='break-end').map(l=>l.empId));
-  const [sh,sm] = settings.workStart.split(':').map(Number);
-  const late = new Set(tl.filter(l=>{
-    if(l.action!=='check-in') return false;
-    const t=new Date(l.time); return t.getHours()>sh||(t.getHours()===sh&&t.getMinutes()>sm+Number(settings.lateThreshold));
-  }).map(l=>l.empId));
-  document.getElementById('s-present').textContent = checkedIn.size;
-  document.getElementById('s-absent').textContent = Math.max(0, employees.length - checkedIn.size);
-  document.getElementById('s-break').textContent = [...breaks].filter(id=>!breakEnded.has(id)).length;
-  document.getElementById('s-late').textContent = late.size;
-  renderTable('dash-log', logs.filter(l=>new Date(l.time).toDateString()===today));
+// ══ DASHBOARD ══
+async function loadDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const [employees, pointages] = await Promise.all([
+    sbGet('employees','status=eq.actif'),
+    sbGet('pointages',`created_at=gte.${today}T00:00:00&order=created_at.desc`)
+  ]);
+  const empMap = {};
+  employees.forEach(e=>empMap[e.id]=e);
+  const presentIds = new Set(pointages.filter(p=>p.type==='entrée').map(p=>p.employee_id));
+  document.getElementById('s-present').textContent = presentIds.size;
+  document.getElementById('s-absent').textContent  = Math.max(0, employees.length - presentIds.size);
+  document.getElementById('s-total').textContent   = pointages.length;
+  const withConf = pointages.filter(p=>p.face_confidence!=null);
+  document.getElementById('s-conf').textContent = withConf.length
+    ? (withConf.reduce((a,p)=>a+parseFloat(p.face_confidence),0)/withConf.length).toFixed(1)+'%' : '—';
+  renderPtTable('dash-log', pointages, empMap, false);
 }
 
-// ── LIVE ──
-function renderLive() { renderTable('live-log', logs, true); }
+// ══ LIVE ══
+async function loadLive() {
+  const [employees, pointages] = await Promise.all([
+    sbGet('employees',''),
+    sbGet('pointages','order=created_at.desc&limit=150')
+  ]);
+  const empMap={};
+  employees.forEach(e=>empMap[e.id]=e);
+  renderPtTable('live-log', pointages, empMap, true);
+}
 
-function renderTable(tbodyId, data, showDate=false) {
+// ══ TABLE RENDERER ══
+function renderPtTable(tbodyId, pointages, empMap, showDate) {
   const tbody = document.getElementById(tbodyId);
-  if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="muted text-center" style="padding:28px;">No events yet.</td></tr>`;
+  if (!pointages.length) {
+    tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">Aucun pointage.</td></tr>`;
     return;
   }
-  const actionBadge = a => ({
-    'check-in':'<span class="badge bg">↑ In</span>',
-    'check-out':'<span class="badge bo">↓ Out</span>',
-    'break-start':'<span class="badge by">⏸ Break</span>',
-    'break-end':'<span class="badge bb">▶ Resume</span>',
-  }[a] || a);
+  const badge = t=>({
+    'entrée':'<span class="badge bg">↑ Entrée</span>',
+    'sortie':'<span class="badge bo">↓ Sortie</span>',
+    'pause': '<span class="badge by">⏸ Pause</span>',
+    'retour':'<span class="badge bb">▶ Retour</span>',
+  }[t]||`<span class="badge">${t}</span>`);
 
-  tbody.innerHTML = data.slice(0,100).map(l=>{
-    const emp = employees.find(e=>e.id===l.empId)||{dept:'—'};
-    const t = new Date(l.time);
+  tbody.innerHTML = pointages.map(p=>{
+    const emp = empMap[p.employee_id]||{full_name:p.employee_id,post:'—'};
+    const t   = new Date(p.created_at);
+    const conf = p.face_confidence!=null ? parseFloat(p.face_confidence) : null;
+    const confHtml = conf!=null
+      ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;">${conf.toFixed(1)}%</div>
+         <div class="conf-bar"><div class="conf-fill ${conf>=80?'conf-high':'conf-low'}" style="width:${Math.min(conf,100)}%"></div></div>`
+      : '<span class="muted" style="font-size:0.78rem;">Manuel</span>';
+    const gps = (p.latitude&&p.longitude)
+      ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;">${parseFloat(p.latitude).toFixed(3)}, ${parseFloat(p.longitude).toFixed(3)}</span>`
+      : '<span class="muted" style="font-size:0.78rem;">—</span>';
     return `<tr>
-      <td>${l.empName}</td>
-      <td class="mono muted">${l.empId}</td>
-      ${showDate?`<td>${emp.dept}</td>`:''}
-      <td>${actionBadge(l.action)}</td>
-      ${showDate?`<td class="mono" style="font-size:0.78rem;">${t.toLocaleDateString()}</td>`:''}
-      <td class="mono" style="font-size:0.78rem;">${t.toLocaleTimeString()}</td>
-      <td>${l.method}</td>
-      <td class="mono muted" style="font-size:0.75rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;">${l.location||'—'}</td>
+      <td><strong>${emp.full_name}</strong></td>
+      ${showDate?`<td class="muted text-sm">${emp.post||'—'}</td>`:''}
+      <td>${badge(p.type)}</td>
+      ${showDate?`<td class="mono muted" style="font-size:0.75rem;">${t.toLocaleDateString('fr-FR')}</td>`:''}
+      <td class="mono" style="font-size:0.78rem;">${t.toLocaleTimeString('fr-FR')}</td>
+      <td>${confHtml}</td>
+      <td>${gps}</td>
+      <td><span class="badge bg">${p.statut}</span></td>
     </tr>`;
   }).join('');
 }
 
-function clearLogs() {
-  if (!confirm('Clear ALL logs? This cannot be undone.')) return;
-  logs = []; saveLogs(); renderLive(); renderDash();
+// ══ EMPLOYEES ══
+async function loadEmployees() {
+  allEmployees = await sbGet('employees','order=full_name.asc');
+  renderEmpTable();
 }
 
-// ── EMPLOYEES ──
-let empSearch='', empDept='';
-function filterEmployees(v){ empSearch=v.toLowerCase(); renderEmpTable(); }
-function filterDept(v){ empDept=v; renderEmpTable(); }
+function filterEmp(v)       { empSearchVal = v.toLowerCase(); renderEmpTable(); }
+function filterEmpStatus(v) { empStatusVal = v;               renderEmpTable(); }
 
 function renderEmpTable() {
-  let list = employees.filter(e=>{
-    const matchS = !empSearch || e.name.toLowerCase().includes(empSearch) || e.id.toLowerCase().includes(empSearch);
-    const matchD = !empDept || e.dept===empDept;
-    return matchS && matchD;
+  const list = allEmployees.filter(e=>{
+    const ms = !empSearchVal || e.full_name.toLowerCase().includes(empSearchVal) || (e.post||'').toLowerCase().includes(empSearchVal);
+    const mv = !empStatusVal || e.status === empStatusVal;
+    return ms && mv;
   });
   const tbody = document.getElementById('emp-table');
-  if (!list.length) { tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">No employees found.</td></tr>`; return; }
+  if (!list.length) {
+    tbody.innerHTML=`<tr><td colspan="7" class="muted text-center" style="padding:28px;">Aucun employé trouvé.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(e=>`<tr>
+    <td><strong>${e.full_name}</strong></td>
+    <td class="muted text-sm">${e.post||'—'}</td>
+    <td class="mono muted" style="font-size:0.75rem;">${e.email||'—'}</td>
+    <td>
+      ${e.login_token
+        ? `<span class="badge bp" style="cursor:pointer;" onclick="showToken('${e.id}','${e.full_name}','${e.login_token}')">${e.login_token}</span>`
+        : '<span class="muted text-sm">—</span>'}
+    </td>
+    <td>${e.face_token
+      ? '<span class="badge bg">✓ Enregistré</span>'
+      : '<span class="badge bo">Non enregistré</span>'}</td>
+    <td><span class="badge ${e.status==='actif'?'bg':'bo'}">${e.status}</span></td>
+    <td>
+      <div class="flex gap-8">
+        <button class="btn btn-ghost btn-sm" onclick="regenerateToken('${e.id}','${e.full_name}')">↻ Token</button>
+        <button class="btn btn-danger btn-sm" onclick="toggleStatus('${e.id}','${e.status}')">
+          ${e.status==='actif'?'Désactiver':'Activer'}
+        </button>
+      </div>
+    </td>
+  </tr>`).join('');
+}
 
-  tbody.innerHTML = list.map(e=>{
-    const todayLogs = logs.filter(l=>l.empId===e.id&&l.action==='check-in'&&l.success&&new Date(l.time).toDateString()===new Date().toDateString());
-    const lastIn = todayLogs.length ? new Date(todayLogs[todayLogs.length-1].time).toLocaleTimeString() : '—';
+// ══ CREATE EMPLOYEE ══
+function openAddEmployee() {
+  // Reset form
+  ['ne-name','ne-post','ne-email','ne-phone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ne-status').value = 'actif';
+  document.getElementById('ne-result').style.display   = 'none';
+  document.getElementById('ne-error').style.display    = 'none';
+  document.getElementById('ne-actions').style.display  = 'flex';
+  document.getElementById('ne-close-btn').style.display = 'none';
+  document.getElementById('btn-create-label').textContent = 'Créer l\'employé';
+  document.getElementById('btn-create-emp').disabled = false;
+  document.getElementById('modal-employee').classList.add('open');
+}
+
+async function createEmployee() {
+  const name   = document.getElementById('ne-name').value.trim();
+  const post   = document.getElementById('ne-post').value.trim();
+  const email  = document.getElementById('ne-email').value.trim();
+  const phone  = document.getElementById('ne-phone').value.trim();
+  const status = document.getElementById('ne-status').value;
+
+  if (!name || !post) {
+    document.getElementById('ne-error-msg').textContent = 'Le nom et le poste sont obligatoires.';
+    document.getElementById('ne-error').style.display = 'flex';
+    return;
+  }
+
+  document.getElementById('btn-create-label').innerHTML = '<span class="spinner"></span> Création…';
+  document.getElementById('btn-create-emp').disabled = true;
+  document.getElementById('ne-error').style.display = 'none';
+
+  // Get company_id from first company (single-company app for now)
+  const companies = await sbGet('companies','limit=1');
+  const companyId = companies[0]?.id || null;
+
+  const token = generateToken();
+  generatedToken = token;
+
+  const payload = {
+    full_name:   name,
+    post:        post,
+    email:       email || null,
+    phone:       phone || null,
+    status:      status,
+    login_token: token,
+    company_id:  companyId,
+    face_token:  null,
+    photo_url:   null,
+  };
+
+  const result = await sbInsert('employees', payload);
+
+  if (result && result[0] && result[0].id) {
+    document.getElementById('ne-token-display').textContent = token;
+    document.getElementById('ne-result').style.display   = 'block';
+    document.getElementById('ne-actions').style.display  = 'none';
+    document.getElementById('ne-close-btn').style.display = 'block';
+  } else {
+    document.getElementById('ne-error-msg').textContent =
+      'Erreur lors de la création : ' + JSON.stringify(result);
+    document.getElementById('ne-error').style.display = 'flex';
+    document.getElementById('btn-create-label').textContent = 'Créer l\'employé';
+    document.getElementById('btn-create-emp').disabled = false;
+  }
+}
+
+function copyToken() {
+  navigator.clipboard.writeText(generatedToken)
+    .then(()=>alert('Code copié : '+generatedToken))
+    .catch(()=>alert('Code : '+generatedToken));
+}
+
+// ══ SHOW TOKEN MODAL ══
+function showToken(id, name, token) {
+  document.getElementById('mt-emp-name').textContent = name;
+  document.getElementById('mt-token').textContent    = token;
+  document.getElementById('modal-token').classList.add('open');
+}
+function copyTokenFromModal() {
+  const t = document.getElementById('mt-token').textContent;
+  navigator.clipboard.writeText(t)
+    .then(()=>alert('Code copié : '+t))
+    .catch(()=>alert('Code : '+t));
+}
+
+// ══ REGENERATE TOKEN ══
+async function regenerateToken(id, name) {
+  if (!confirm(`Régénérer le code d'accès de ${name} ? L'ancien code ne fonctionnera plus.`)) return;
+  const token = generateToken();
+  await sbPatch('employees',`id=eq.${id}`,{login_token:token});
+  await loadEmployees();
+  showToken(id, name, token);
+}
+
+// ══ TOGGLE STATUS ══
+async function toggleStatus(id, currentStatus) {
+  const next = currentStatus==='actif' ? 'inactif' : 'actif';
+  await sbPatch('employees',`id=eq.${id}`,{status:next});
+  await loadEmployees();
+}
+
+// ══ POINTAGES REPORT ══
+async function loadPointages() {
+  const from = document.getElementById('rep-from').value;
+  const to   = document.getElementById('rep-to').value;
+  let filter = 'order=created_at.desc';
+  if (from) filter += `&created_at=gte.${from}T00:00:00`;
+  if (to)   filter += `&created_at=lte.${to}T23:59:59`;
+  const [pointages, employees] = await Promise.all([
+    sbGet('pointages', filter),
+    sbGet('employees','')
+  ]);
+  cachedPointages = pointages;
+  const empMap={};
+  employees.forEach(e=>empMap[e.id]=e);
+  const tbody = document.getElementById('rep-table');
+  if (!pointages.length) {
+    tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">Aucun pointage pour cette période.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = pointages.map(p=>{
+    const emp = empMap[p.employee_id]||{full_name:p.employee_id};
+    const t   = new Date(p.created_at);
     return `<tr>
-      <td><strong>${e.name}</strong></td>
-      <td class="mono" style="font-size:0.78rem;">${e.id}</td>
-      <td>${e.dept}</td>
-      <td class="muted text-sm">${e.role}</td>
-      <td class="mono" style="font-size:0.78rem;">${lastIn}</td>
-      <td>${e.biometric?'<span class="badge bg">✓ Yes</span>':'<span class="badge bo">None</span>'}</td>
-      <td><span class="badge bg">Active</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="removeEmp('${e.id}')">Remove</button></td>
+      <td>${emp.full_name}</td>
+      <td>${p.type}</td>
+      <td class="mono" style="font-size:0.78rem;">${t.toLocaleDateString('fr-FR')}</td>
+      <td class="mono" style="font-size:0.78rem;">${t.toLocaleTimeString('fr-FR')}</td>
+      <td class="mono" style="font-size:0.78rem;">${p.face_confidence!=null?parseFloat(p.face_confidence).toFixed(1)+'%':'—'}</td>
+      <td class="mono muted" style="font-size:0.75rem;">${p.latitude||'—'}</td>
+      <td class="mono muted" style="font-size:0.75rem;">${p.longitude||'—'}</td>
+      <td><span class="badge bg">${p.statut}</span></td>
     </tr>`;
   }).join('');
 }
 
-function openAddEmp() { document.getElementById('modal-emp').classList.add('open'); }
-function addEmployee() {
-  const name=document.getElementById('ne-name').value.trim();
-  const id=document.getElementById('ne-id').value.trim();
-  const dept=document.getElementById('ne-dept').value;
-  const role=document.getElementById('ne-role').value.trim();
-  const startOverride=document.getElementById('ne-start').value;
-  if(!name||!id){alert('Name and ID required.');return;}
-  if(employees.find(e=>e.id===id)){alert('ID already exists.');return;}
-  employees.push({name,id,dept,role,biometric:false,startOverride});
-  saveEmp(); closeModal('modal-emp'); renderEmpTable();
-}
-function removeEmp(id) {
-  if(!confirm('Remove this employee?')) return;
-  employees = employees.filter(e=>e.id!==id);
-  saveEmp(); renderEmpTable();
-}
-
-// ── DEVICES ──
-function renderDevices() {
-  const tbody = document.getElementById('device-table');
-  if (!devices.length) { tbody.innerHTML=`<tr><td colspan="7" class="muted text-center" style="padding:28px;">No devices registered.</td></tr>`; return; }
-  tbody.innerHTML = devices.map(d=>`<tr>
-    <td><strong>${d.name}</strong></td>
-    <td class="mono" style="font-size:0.75rem;">${d.token}</td>
-    <td>${d.type}</td>
-    <td>${d.location}</td>
-    <td class="mono muted" style="font-size:0.75rem;">${new Date(d.registered).toLocaleDateString()}</td>
-    <td><span class="badge bg">Online</span></td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeDevice('${d.token}')">Remove</button></td>
-  </tr>`).join('');
-}
-function openAddDevice() { document.getElementById('modal-device').classList.add('open'); }
-function addDevice() {
-  const name=document.getElementById('nd-name').value.trim();
-  const loc=document.getElementById('nd-loc').value.trim();
-  const type=document.getElementById('nd-type').value;
-  if(!name){alert('Device name required.');return;}
-  const token='LC-'+Math.random().toString(36).substr(2,8).toUpperCase();
-  devices.push({name,token,type,location:loc,registered:new Date().toISOString()});
-  saveDevices(); closeModal('modal-device'); renderDevices();
-}
-function removeDevice(token) {
-  if(!confirm('Remove device?')) return;
-  devices=devices.filter(d=>d.token!==token);
-  saveDevices(); renderDevices();
-}
-
-// ── REPORTS ──
-function renderReports() {
-  const tbody = document.getElementById('rep-table');
-  const [sh,sm] = settings.workStart.split(':').map(Number);
-  tbody.innerHTML = employees.map(emp=>{
-    const el = logs.filter(l=>l.empId===emp.id&&l.success);
-    const checkIns = el.filter(l=>l.action==='check-in');
-    const checkOuts = el.filter(l=>l.action==='check-out');
-    const days = new Set(checkIns.map(l=>new Date(l.time).toDateString())).size;
-    let ms=0;
-    checkIns.forEach(ci=>{ const co=checkOuts.find(co=>new Date(co.time)>new Date(ci.time)); if(co) ms+=new Date(co.time)-new Date(ci.time); });
-    const hrs=(ms/3600000).toFixed(1);
-    const late=checkIns.filter(l=>{const t=new Date(l.time);return t.getHours()>sh||(t.getHours()===sh&&t.getMinutes()>sm+Number(settings.lateThreshold));}).length;
-    const avg=checkIns.length?(()=>{const m=checkIns.reduce((a,l)=>{const t=new Date(l.time);return a+t.getHours()*60+t.getMinutes();},0)/checkIns.length;return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(Math.round(m%60)).padStart(2,'0')}`;})():'—';
-    return `<tr><td>${emp.name}</td><td class="muted text-sm">${emp.dept}</td><td>${days}</td><td>${Math.max(0,5-days)}</td><td>${hrs}h</td><td>${late?`<span class="badge by">${late}</span>`:'0'}</td><td class="mono" style="font-size:0.78rem;">${avg}</td></tr>`;
-  }).join('') || `<tr><td colspan="7" class="muted text-center" style="padding:28px;">No data.</td></tr>`;
-}
 function exportCSV() {
-  const h=['Employee','ID','Action','Time','Method','Location','Success'];
-  const rows=logs.map(l=>[l.empName,l.empId,l.action,l.time,l.method,l.location||'',l.success]);
-  const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='lightcheck-logs.csv';a.click();
+  if (!cachedPointages.length) { alert('Générez d\'abord un rapport.'); return; }
+  const h = ['ID','employee_id','type','created_at','face_confidence','latitude','longitude','statut'];
+  const csv = [h.join(','), ...cachedPointages.map(p=>h.map(k=>`"${p[k]||''}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'lightcheck-pointages.csv'; a.click();
 }
 function exportJSON() {
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(logs,null,2)],{type:'application/json'}));a.download='lightcheck-logs.json';a.click();
+  if (!cachedPointages.length) { alert('Générez d\'abord un rapport.'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(cachedPointages,null,2)],{type:'application/json'}));
+  a.download = 'lightcheck-pointages.json'; a.click();
 }
 
-// ── SETTINGS ──
-function saveSettings(){
-  settings.workStart=document.getElementById('set-start').value;
-  settings.workEnd=document.getElementById('set-end').value;
-  settings.lateThreshold=document.getElementById('set-late').value;
-  localStorage.setItem('lc_settings',JSON.stringify(settings));
-  alert('Settings saved.');
+// ══ SETTINGS ══
+function loadSettings() {
+  document.getElementById('set-facepp-key').value    = localStorage.getItem('lc_facepp_key')    || '';
+  document.getElementById('set-facepp-secret').value = localStorage.getItem('lc_facepp_secret') || '';
+  document.getElementById('set-threshold').value     = localStorage.getItem('lc_threshold')     || '80';
 }
-function saveAPIKeys(){
-  ['aws','azure','sb-url','sb-key'].forEach(k=>localStorage.setItem('lc_'+k,document.getElementById('set-'+k).value));
-  alert('API config saved.');
+function saveFaceppKeys() {
+  localStorage.setItem('lc_facepp_key',    document.getElementById('set-facepp-key').value.trim());
+  localStorage.setItem('lc_facepp_secret', document.getElementById('set-facepp-secret').value.trim());
+  localStorage.setItem('lc_threshold',     document.getElementById('set-threshold').value);
+  alert('✓ Clés Face++ enregistrées.');
 }
-function changePassword(){
-  const np=document.getElementById('new-pass').value;
-  const cp=document.getElementById('conf-pass').value;
-  if(!np){alert('Enter a new password.');return;}
-  if(np!==cp){alert('Passwords do not match.');return;}
-  adminPass=np; localStorage.setItem('lc_admin_pass',np);
-  alert('Password updated.');
+async function testSupabase() {
+  try {
+    const data = await sbGet('employees','limit=1');
+    if (Array.isArray(data)) {
+      document.getElementById('sb-status').textContent = '◉ Connecté · '+data.length+' employé(s)';
+      document.getElementById('sb-status').className = 'badge bg';
+    } else throw new Error(JSON.stringify(data));
+  } catch(e) {
+    document.getElementById('sb-status').textContent = '✗ Erreur : '+e.message;
+    document.getElementById('sb-status').className = 'badge bo';
+  }
+}
+function changePassword() {
+  const np = document.getElementById('new-pass').value;
+  const cp = document.getElementById('conf-pass').value;
+  if (!np)    { alert('Entrez un nouveau mot de passe.'); return; }
+  if (np!==cp){ alert('Les mots de passe ne correspondent pas.'); return; }
+  adminPass = np; localStorage.setItem('lc_admin_pass', np);
+  alert('✓ Mot de passe mis à jour.');
 }
 
-// ── MODAL ──
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-bd').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+// ══ MODAL ══
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bd').forEach(m=>
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); })
+);
 
-// Load saved settings
-document.getElementById('set-start').value=settings.workStart||'09:00';
-document.getElementById('set-end').value=settings.workEnd||'17:00';
-document.getElementById('set-late').value=settings.lateThreshold||15;
+// ══ MOBILE SIDEBAR ══
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ══ NOTIFICATIONS (employee logouts) ══
+const NOTIF_KEY = 'lc_last_notif_seen';
+let notifData = [];
+
+async function fetchNotifications(){
+  const cutoff = new Date(Date.now() - 7*24*60*60*1000).toISOString(); // last 7 days
+  const [pointages, employees] = await Promise.all([
+    sbGet('pointages', `type=eq.déconnexion&created_at=gte.${cutoff}&order=created_at.desc&limit=30`),
+    sbGet('employees', '')
+  ]);
+  const empMap = {};
+  employees.forEach(e=>empMap[e.id]=e);
+  notifData = (pointages||[]).map(p=>({
+    ...p,
+    emp: empMap[p.employee_id]||{full_name:'Employé inconnu'}
+  }));
+  renderNotifications();
+}
+
+function renderNotifications(){
+  const lastSeen = parseInt(localStorage.getItem(NOTIF_KEY)||'0');
+  const list = document.getElementById('notif-list');
+  const badge = document.getElementById('notif-badge');
+
+  if(!notifData.length){
+    list.innerHTML='<div class="notif-empty">Aucune déconnexion récente</div>';
+    badge.style.display='none';
+    return;
+  }
+
+  const unreadCount = notifData.filter(n=>new Date(n.created_at).getTime()>lastSeen).length;
+  if(unreadCount>0){
+    badge.textContent = unreadCount>9?'9+':unreadCount;
+    badge.style.display='flex';
+  } else {
+    badge.style.display='none';
+  }
+
+  list.innerHTML = notifData.map(n=>{
+    const isUnread = new Date(n.created_at).getTime()>lastSeen;
+    const t = new Date(n.created_at);
+    const timeStr = t.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' · '+t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="notif-item ${isUnread?'unread':''}">
+      <div class="notif-icon">🔓</div>
+      <div class="notif-info">
+        <div class="notif-name">${n.emp.full_name}</div>
+        <div class="notif-msg">S'est déconnecté(e) de l'application</div>
+        <div class="notif-time">${timeStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleNotifications(){
+  const dd = document.getElementById('notif-dropdown');
+  dd.classList.toggle('open');
+}
+
+function clearNotifications(){
+  localStorage.setItem(NOTIF_KEY, Date.now().toString());
+  document.getElementById('notif-badge').style.display='none';
+  renderNotifications();
+}
+
+// Close notification dropdown when clicking outside
+document.addEventListener('click', e=>{
+  const wrap = document.querySelector('.notif-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    document.getElementById('notif-dropdown').classList.remove('open');
+  }
+});
+
+// Auto-refresh notifications every 30 seconds after admin login
+let notifInterval = null;
+function startNotifPolling(){
+  fetchNotifications();
+  notifInterval = setInterval(fetchNotifications, 30000);
+}
+
+// ══ ADMIN LOGOUT ══
+function adminLogout(){
+  if(!confirm('Se déconnecter de la console admin ?')) return;
+  localStorage.removeItem('lc_admin_session');
+  if(notifInterval) clearInterval(notifInterval);
+  location.reload();
+}
 </script>
 </body>
 </html>
