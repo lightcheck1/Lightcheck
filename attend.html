@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --green:#2ecc71;--green-dark:#1a7a4a;--green-dim:rgba(46,204,113,0.15);
+  --green:#f5c542;--green-dark:#c9a030;--green-dim:rgba(245,197,66,0.15);
   --red:#e74c3c;--amber:#f39c12;--blue:#3498db;
   --dark:#0f0f0f;--dark2:#1a1a1a;--dark3:#242424;--dark4:#2e2e2e;
   --text:#ffffff;--text2:rgba(255,255,255,0.6);--text3:rgba(255,255,255,0.3);
@@ -36,7 +36,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .btn-main{width:100%;padding:16px;border-radius:12px;border:none;font-family:'Instrument Sans',sans-serif;
   font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .btn-green-solid{background:var(--green);color:#000;}
-.btn-green-solid:hover{background:#27ae60;}
+.btn-green-solid:hover{background:#d4a832;}
 .btn-green-solid:active{transform:scale(0.98);}
 .login-error{background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);border-radius:10px;
   padding:10px 14px;font-size:0.82rem;color:var(--red);margin-top:12px;display:none;}
@@ -57,11 +57,11 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 #reg-video{width:100%;height:100%;object-fit:cover;}
 #reg-canvas{display:none;}
 .reg-cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
-.reg-face-ring{width:220px;height:220px;border-radius:50%;border:2.5px solid rgba(46,204,113,0.8);
-  box-shadow:0 0 0 6px rgba(46,204,113,0.12),inset 0 0 40px rgba(46,204,113,0.06);
+.reg-face-ring{width:220px;height:220px;border-radius:50%;border:2.5px solid rgba(245,197,66,0.8);
+  box-shadow:0 0 0 6px rgba(245,197,66,0.12),inset 0 0 40px rgba(245,197,66,0.06);
   animation:ring 2.5s ease-in-out infinite;}
-@keyframes ring{0%,100%{box-shadow:0 0 0 6px rgba(46,204,113,0.12);}50%{box-shadow:0 0 0 14px rgba(46,204,113,0.2);}}
-.reg-scan{position:absolute;width:220px;height:2px;background:linear-gradient(90deg,transparent,rgba(46,204,113,0.8),transparent);
+@keyframes ring{0%,100%{box-shadow:0 0 0 6px rgba(245,197,66,0.12);}50%{box-shadow:0 0 0 14px rgba(245,197,66,0.2);}}
+.reg-scan{position:absolute;width:220px;height:2px;background:linear-gradient(90deg,transparent,rgba(245,197,66,0.8),transparent);
   animation:scan 2.5s ease-in-out infinite;}
 @keyframes scan{0%{top:calc(50% - 110px);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(50% + 110px);opacity:0;}}
 .reg-instructions{position:absolute;bottom:24px;left:0;right:0;text-align:center;}
@@ -72,7 +72,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .reg-emp-sub{color:var(--text2);font-size:0.82rem;margin-bottom:16px;}
 .reg-capture-btn{width:72px;height:72px;border-radius:50%;background:var(--green);border:4px solid rgba(255,255,255,0.15);
   display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;margin:0 auto;
-  transition:transform 0.15s,background 0.15s;box-shadow:0 4px 24px rgba(46,204,113,0.35);}
+  transition:transform 0.15s,background 0.15s;box-shadow:0 4px 24px rgba(245,197,66,0.35);}
 .reg-capture-btn:active{transform:scale(0.92);}
 .reg-capture-btn:disabled{background:var(--dark4);box-shadow:none;cursor:not-allowed;}
 
@@ -80,7 +80,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .reg-preview-wrap{flex:1;position:relative;overflow:hidden;}
 .reg-preview-wrap img{width:100%;height:100%;object-fit:cover;}
 .reg-preview-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;}
-.reg-preview-check{width:80px;height:80px;border-radius:50%;background:rgba(46,204,113,0.9);
+.reg-preview-check{width:80px;height:80px;border-radius:50%;background:rgba(245,197,66,0.9);
   display:flex;align-items:center;justify-content:center;font-size:2.2rem;}
 .reg-preview-bottom{flex-shrink:0;padding:20px 24px 36px;background:var(--dark);}
 .reg-preview-row{display:flex;gap:12px;}
@@ -99,7 +99,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .tc-brand{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;}
 .tc-brand em{font-style:italic;color:var(--green);}
 .tc-emp-pill{display:flex;align-items:center;gap:8px;}
-.tc-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2ecc71,#1a7a4a);
+.tc-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f5c542,#c9a030);
   display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#000;flex-shrink:0;}
 .tc-emp-name{font-size:0.82rem;font-weight:500;}
 
@@ -111,7 +111,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .tc-strip-text strong{color:var(--text);font-weight:500;}
 .tc-strip-badge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;
   padding:3px 8px;border-radius:20px;font-weight:500;}
-.badge-in{background:rgba(46,204,113,0.15);color:var(--green);}
+.badge-in{background:rgba(245,197,66,0.15);color:var(--green);}
 .badge-out{background:rgba(231,76,60,0.15);color:var(--red);}
 .badge-pause{background:rgba(243,156,18,0.15);color:var(--amber);}
 .badge-warn{background:rgba(231,76,60,0.15);color:var(--red);}
@@ -121,10 +121,10 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 #video{width:100%;height:100%;object-fit:cover;display:block;}
 #canvas{display:none;}
 .tc-cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
-.tc-face-ring{width:200px;height:200px;border-radius:50%;border:2px solid rgba(46,204,113,0.7);
-  box-shadow:0 0 0 5px rgba(46,204,113,0.1),inset 0 0 30px rgba(46,204,113,0.05);
+.tc-face-ring{width:200px;height:200px;border-radius:50%;border:2px solid rgba(245,197,66,0.7);
+  box-shadow:0 0 0 5px rgba(245,197,66,0.1),inset 0 0 30px rgba(245,197,66,0.05);
   animation:ring 2.5s ease-in-out infinite;}
-.tc-scan{position:absolute;width:200px;height:2px;background:linear-gradient(90deg,transparent,rgba(46,204,113,0.7),transparent);
+.tc-scan{position:absolute;width:200px;height:2px;background:linear-gradient(90deg,transparent,rgba(245,197,66,0.7),transparent);
   animation:scan 2.5s ease-in-out infinite;}
 .cam-start-overlay{position:absolute;inset:0;background:var(--dark2);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:12px;}
@@ -165,7 +165,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .capture-row{display:flex;align-items:center;justify-content:center;padding:8px 0 16px;position:relative;}
 .capture-btn{width:76px;height:76px;border-radius:50%;background:var(--green);border:4px solid rgba(255,255,255,0.15);
   display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;
-  transition:transform 0.15s,background 0.15s;box-shadow:0 4px 28px rgba(46,204,113,0.4);}
+  transition:transform 0.15s,background 0.15s;box-shadow:0 4px 28px rgba(245,197,66,0.4);}
 .capture-btn:active{transform:scale(0.91);}
 .capture-btn:disabled{background:var(--dark4);box-shadow:none;cursor:not-allowed;}
 .manual-btn{position:absolute;right:0;background:var(--dark3);border:1px solid var(--dark4);
@@ -233,7 +233,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
 .result-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:1.8rem;margin:0 auto 14px;}
-.result-icon.ok{background:rgba(46,204,113,0.15);border:2px solid rgba(46,204,113,0.4);}
+.result-icon.ok{background:rgba(245,197,66,0.15);border:2px solid rgba(245,197,66,0.4);}
 .result-icon.fail{background:rgba(231,76,60,0.15);border:2px solid rgba(231,76,60,0.4);}
 .result-title{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:4px;}
 .result-sub{color:var(--text2);font-size:0.85rem;text-align:center;margin-bottom:20px;}
@@ -244,7 +244,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 .result-val{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;font-weight:500;}
 .result-close{width:100%;padding:15px;border-radius:12px;border:none;background:var(--green);
   color:#000;font-family:'Instrument Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
-.result-close:active{background:#27ae60;}
+.result-close:active{background:#d4a832;}
 
 /* SHARED NAV (reused across screens) */
 .nav-shared{display:flex;background:var(--dark2);border-top:1px solid var(--dark4);flex-shrink:0;}
@@ -522,8 +522,23 @@ const FACEPP_COMPARE = 'https://api-us.faceplusplus.com/facepp/v3/compare';
 const CONF_THRESHOLD = 80;
 const SESSION_KEY    = 'lc_session_emp_id';
 
-const fKey = () => localStorage.getItem('lc_facepp_key')    || '';
-const fSec = () => localStorage.getItem('lc_facepp_secret') || '';
+const fKey = () => window._faceppKey    || '';
+const fSec = () => window._faceppSecret || '';
+const fThresh = () => window._faceppThreshold || 80;
+
+// Load Face++ config from Supabase at startup (shared across all devices)
+async function loadFaceppConfig() {
+  try {
+    const rows = await sbGet('config', 'id=eq.app');
+    if (rows && rows[0]) {
+      window._faceppKey       = rows[0].facepp_key       || '';
+      window._faceppSecret    = rows[0].facepp_secret    || '';
+      window._faceppThreshold = rows[0].confidence_threshold || 80;
+    }
+  } catch(e) {
+    console.warn('Config Face++ non chargée :', e);
+  }
+}
 
 // ══ SUPABASE ══
 const sbH = { apikey:SUPABASE_KEY, Authorization:'Bearer '+SUPABASE_KEY };
@@ -580,6 +595,8 @@ function goTo(id, el){
 
 // ══ PERSISTENT LOGIN CHECK ══
 window.addEventListener('load', async ()=>{
+  // Load Face++ keys from Supabase first (shared, device-independent)
+  await loadFaceppConfig();
   const savedId = localStorage.getItem(SESSION_KEY);
   if(savedId){
     const emps = await sbGet('employees',`id=eq.${savedId}&status=eq.actif`);
@@ -855,10 +872,10 @@ async function captureAndPointage(){
     const conf=parseFloat(d2.confidence||0);
     showConfBar(conf);
 
-    if(conf>=CONF_THRESHOLD){
+    if(conf >= fThresh()){
       await recordPointage('Face++',conf);
     } else {
-      showResult(false,conf,`Confiance insuffisante — ${conf.toFixed(1)}% (seuil : ${CONF_THRESHOLD}%).`,null);
+      showResult(false,conf,`Confiance insuffisante — ${conf.toFixed(1)}% (seuil : ${fThresh()}%).`,null);
     }
   }catch(e){
     showResult(false,null,'Erreur réseau : '+e.message,null);
