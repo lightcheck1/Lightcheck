@@ -36,3 +36,5 @@ waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+run = "node server.js"

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Light Check — Rapports</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --yellow:#f5c542;--yellow-dim:rgba(245,197,66,0.12);--yellow-dark:#c9a030;
+  --dark:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#484f58;
+  --red:#e74c3c;--blue:#58a6ff;--green:#3fb950;--purple:#bc8cff;--orange:#f78166;
+  --radius:14px;
+}
+html,body{height:100%;background:var(--dark);color:var(--text);font-family:'Instrument Sans',sans-serif;overflow-x:hidden;}
+
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:50;background:var(--dark);border-bottom:1px solid var(--border);
+  padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.back-btn{background:transparent;border:1px solid var(--border);border-radius:8px;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  color:var(--text2);font-size:1.1rem;cursor:pointer;text-decoration:none;transition:all 0.15s;}
+.back-btn:hover{background:var(--surface2);color:var(--text);}
+.topbar-brand{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;}
+.topbar-brand em{font-style:italic;color:var(--yellow);}
+.live-badge{display:flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;
+  font-size:0.62rem;color:var(--yellow);background:var(--yellow-dim);
+  padding:3px 8px;border-radius:20px;border:1px solid rgba(245,197,66,0.2);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--yellow);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* ── TABS ── */
+.tabs-wrap{padding:12px 16px 0;background:var(--dark);position:sticky;top:52px;z-index:40;border-bottom:1px solid var(--border);}
+.tabs{display:flex;gap:0;background:var(--surface2);border-radius:10px;padding:3px;overflow-x:auto;}
+.tab{flex-shrink:0;padding:7px 16px;border-radius:8px;border:none;background:transparent;
+  color:var(--text2);font-family:'Instrument Sans',sans-serif;font-size:0.82rem;font-weight:500;
+  cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+.tab-pane{display:none;padding:12px 16px 100px;}
+.tab-pane.active{display:block;animation:fadeUp 0.2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── PAGE HEADER ── */
+.page-header{padding:16px 16px 4px;}
+.page-title{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;letter-spacing:-0.4px;}
+.page-sub{color:var(--text2);font-size:0.82rem;margin-top:3px;}
+
+/* ── REPORT CARDS ── */
+.report-list{display:flex;flex-direction:column;gap:10px;padding:12px 16px 100px;}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  display:flex;align-items:flex-start;gap:14px;padding:16px;cursor:pointer;
+  transition:all 0.15s;position:relative;text-align:left;}
+.report-card:hover{border-color:rgba(245,197,66,0.3);background:var(--surface2);}
+.report-card:active{transform:scale(0.99);}
+.report-card.new-report{border-style:dashed;border-color:var(--border);}
+.report-card.new-report:hover{border-color:var(--yellow);}
+
+.report-icon{width:46px;height:46px;border-radius:12px;background:var(--surface2);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:1.4rem;}
+.report-body{flex:1;min-width:0;}
+.report-title{font-size:0.9rem;font-weight:600;margin-bottom:5px;color:var(--text);}
+.report-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
+.report-meta{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.report-tag{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;padding:2px 7px;
+  border-radius:20px;font-weight:500;}
+.tag-y{background:var(--yellow-dim);color:var(--yellow);}
+.tag-b{background:rgba(88,166,255,0.12);color:var(--blue);}
+.tag-g{background:rgba(63,185,80,0.12);color:var(--green);}
+.tag-p{background:rgba(188,140,255,0.12);color:var(--purple);}
+.tag-o{background:rgba(247,129,102,0.12);color:var(--orange);}
+
+.report-more{position:absolute;top:12px;right:12px;background:transparent;border:none;
+  color:var(--text3);font-size:1.1rem;cursor:pointer;padding:4px 6px;border-radius:6px;
+  line-height:1;transition:all 0.15s;}
+.report-more:hover{background:var(--surface2);color:var(--text2);}
+
+/* ── REPORT PANEL (slide-up) ── */
+.panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(6px);z-index:200;align-items:flex-end;justify-content:center;}
+.panel-overlay.open{display:flex;}
+.panel-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;
+  max-height:90vh;display:flex;flex-direction:column;animation:slideUp 0.3s cubic-bezier(0.4,0,0.2,1);}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.panel-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 0;}
+.panel-head{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
+.panel-head-info{flex:1;}
+.panel-head-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;}
+.panel-head-sub{color:var(--text2);font-size:0.78rem;margin-top:3px;}
+.panel-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);font-size:1rem;flex-shrink:0;margin-left:12px;}
+.panel-close:hover{background:var(--border);}
+.panel-toolbar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.panel-body{flex:1;overflow-y:auto;padding:16px 20px 32px;}
+
+/* Filters */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+.fi{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;
+  font-size:0.82rem;outline:none;transition:border-color 0.15s;}
+.fi:focus{border-color:var(--yellow);}
+.fi-date{width:130px;}
+.fsel{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;color:var(--text);font-family:'Instrument Sans',sans-serif;
+  font-size:0.82rem;outline:none;appearance:none;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:7px 14px;border-radius:8px;border:none;font-family:'Instrument Sans',sans-serif;
+  font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.btn-yellow{background:var(--yellow);color:#0d1117;}
+.btn-yellow:hover{background:var(--yellow-dark);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:0.75rem;}
+
+/* Stats row */
+.stat-mini-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stat-mini{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.stat-mini-label{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);}
+.stat-mini-val{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--yellow);margin-top:2px;}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;min-width:400px;}
+thead tr{background:var(--surface2);}
+th{padding:9px 12px;text-align:left;font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);
+  font-weight:500;white-space:nowrap;}
+td{padding:10px 12px;border-top:1px solid var(--border);font-size:0.82rem;vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;}
+.muted{color:var(--text2);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;
+  font-size:0.68rem;font-family:'IBM Plex Mono',monospace;font-weight:500;white-space:nowrap;}
+.bg{background:rgba(63,185,80,0.12);color:var(--green);}
+.by{background:var(--yellow-dim);color:var(--yellow);}
+.bo{background:rgba(247,129,102,0.12);color:var(--orange);}
+.bb{background:rgba(88,166,255,0.12);color:var(--blue);}
+.conf-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:3px;width:60px;}
+.conf-fill{height:100%;border-radius:2px;background:var(--yellow);}
+
+/* Loading / empty */
+.loading{text-align:center;padding:40px 20px;color:var(--text3);}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);
+  border-top-color:var(--yellow);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:2rem;margin-bottom:8px;}
+
+/* Section title */
+.section-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;
+  letter-spacing:2px;color:var(--text3);margin:20px 0 10px;padding-left:2px;}
+
+/* Export bar */
+.export-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);
+  border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 8px 12px;border:none;background:transparent;color:var(--text3);
+  font-family:'Instrument Sans',sans-serif;font-size:0.68rem;gap:4px;cursor:pointer;text-decoration:none;}
+.bnav-item.active{color:var(--yellow);}
+.bnav-icon{font-size:1.2rem;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--dark);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="index.html">←</a>
+    <div class="topbar-brand">Light <em>Check</em></div>
+  </div>
+  <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-title">Rapports</div>
+  <div class="page-sub">Sélectionnez un rapport pour générer et exporter vos données</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('presence',this)">Présence & Pointage</button>
+    <button class="tab" onclick="switchTab('employes',this)">Employés</button>
+    <button class="tab" onclick="switchTab('personnalise',this)">Personnalisé</button>
+  </div>
+</div>
+
+<!-- ══ TAB 1 — PRÉSENCE & POINTAGE ══ -->
+<div class="tab-pane active" id="tab-presence">
+  <div class="report-list" style="padding:12px 0 100px;">
+
+    <div class="report-card" onclick="openReport('heures-total')">
+      <div class="report-icon">⏱</div>
+      <div class="report-body">
+        <div class="report-title">Rapport total des heures</div>
+        <div class="report-desc">Affiche les heures travaillées par chaque employé, utile pour les calculs de paie incluant les heures supplémentaires.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-y">Paie</span>
+          <span class="report-tag tag-g">Exportable</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'heures-total')">⋮</button>
+    </div>
+
+    <div class="report-card" onclick="openReport('heures-synthese')">
+      <div class="report-icon">📊</div>
+      <div class="report-body">
+        <div class="report-title">Rapport de synthèse des heures</div>
+        <div class="report-desc">Vue synthétique des heures permettant une comparaison facile entre périodes et entre employés.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-b">Analyse</span>
+          <span class="report-tag tag-g">Exportable</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'heures-synthese')">⋮</button>
+    </div>
+
+    <div class="report-card" onclick="openReport('presence')">
+      <div class="report-icon">📋</div>
+      <div class="report-body">
+        <div class="report-title">Rapport de présence</div>
+        <div class="report-desc">Suivi des présences et absences — catégorisées par motif (congé, jour férié, remplacement) avec horaires et plage de dates.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-y">RH</span>
+          <span class="report-tag tag-g">Exportable</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'presence')">⋮</button>
+    </div>
+
+    <div class="report-card" onclick="openReport('evenements')">
+      <div class="report-icon">🔄</div>
+      <div class="report-body">
+        <div class="report-title">Rapport des événements</div>
+        <div class="report-desc">Suit tous les événements système — tentatives d'accès, heures d'entrée/sortie et activités liées à la sécurité.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-o">Sécurité</span>
+          <span class="report-tag tag-g">Exportable</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'evenements')">⋮</button>
+    </div>
+
+    <div class="report-card" onclick="openReport('productivite')">
+      <div class="report-icon">📈</div>
+      <div class="report-body">
+        <div class="report-title">Rapport de productivité</div>
+        <div class="report-desc">Analyse les métriques de productivité des employés — heures productives, taux de ponctualité et ratios d'efficacité.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-p">Performance</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'productivite')">⋮</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ TAB 2 — EMPLOYÉS ══ -->
+<div class="tab-pane" id="tab-employes">
+  <div class="report-list" style="padding:12px 0 100px;">
+
+    <div class="report-card" onclick="openReport('employes-detail')">
+      <div class="report-icon">👤</div>
+      <div class="report-body">
+        <div class="report-title">Rapport détaillé des employés</div>
+        <div class="report-desc">Informations complètes sur les employés — coordonnées, poste, statut et historique d'accès au système.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-b">RH</span>
+          <span class="report-tag tag-g">Exportable</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'employes-detail')">⋮</button>
+    </div>
+
+    <div class="report-card" onclick="openReport('appareils')">
+      <div class="report-icon">📱</div>
+      <div class="report-body">
+        <div class="report-title">Rapport des appareils</div>
+        <div class="report-desc">Liste les appareils enregistrés dans le système avec le type d'appareil, la localisation, le statut et la dernière date d'activité.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-o">Technique</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'appareils')">⋮</button>
+    </div>
+
+    <div class="report-card" onclick="openReport('visages')">
+      <div class="report-icon">🤳</div>
+      <div class="report-body">
+        <div class="report-title">Rapport biométrique</div>
+        <div class="report-desc">Statut de l'enregistrement du visage et scores de confiance Face++ moyens par employé.</div>
+        <div class="report-meta">
+          <span class="report-tag tag-p">Biométrie</span>
+          <span class="report-tag tag-g">Exportable</span>
+        </div>
+      </div>
+      <button class="report-more" onclick="event.stopPropagation();showMenu(event,'visages')">⋮</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ TAB 3 — PERSONNALISÉ ══ -->
+<div class="tab-pane" id="tab-personnalise">
+  <div class="report-list" style="padding:12px 0 100px;">
+
+    <div class="report-card new-report" onclick="openReport('custom')">
+      <div class="report-icon" style="background:var(--yellow-dim);border-color:rgba(245,197,66,0.3);">+</div>
+      <div class="report-body">
+        <div class="report-title" style="color:var(--yellow);">Nouveau rapport personnalisé</div>
+        <div class="report-desc">Créez un rapport sur mesure en choisissant vos employés, vos colonnes, votre période et le format d'export.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ REPORT PANEL ══ -->
+<div class="panel-overlay" id="panel-overlay" onclick="maybeClose(event)">
+  <div class="panel-sheet" id="panel-sheet">
+    <div class="panel-handle"></div>
+    <div class="panel-head">
+      <div class="panel-head-info">
+        <div class="panel-head-title" id="panel-title">—</div>
+        <div class="panel-head-sub" id="panel-sub">—</div>
+      </div>
+      <div class="panel-close" onclick="closePanel()">✕</div>
+    </div>
+    <div class="panel-toolbar" id="panel-toolbar"></div>
+    <div class="panel-body" id="panel-body">
+      <div class="loading"><div class="spinner"></div><div>Chargement…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="bnav-item" href="index.html"><div class="bnav-icon">🏠</div>Accueil</a>
+  <a class="bnav-item active" href="rapports.html"><div class="bnav-icon">📊</div>Rapports</a>
+  <a class="bnav-item" href="admin.html"><div class="bnav-icon">▦</div>Admin</a>
+  <a class="bnav-item" href="attend.html"><div class="bnav-icon">◉</div>Pointer</a>
+</nav>
+
+<script>
+// ══ CONFIG ══
+const SUPABASE_URL = 'https://cokuyebjlkuolwpwizko.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNva3V5ZWJqbGt1b2x3cHdpemtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzI5ODEsImV4cCI6MjA5NDk0ODk4MX0.PbKN4yz8wem8NisRp3ZXHcQrwG0iK1e-QyLNJEgSdJU';
+const sbH = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY };
+
+async function sbGet(t, q=''){
+  return (await fetch(`${SUPABASE_URL}/rest/v1/${t}?${q}`, { headers: sbH })).json();
+}
+
+// ══ TABS ══
+function switchTab(id, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+// ══ PANEL ══
+let currentReportId = null;
+let cachedData = {};
+
+function openPanel(title, sub, toolbarHtml, bodyFn){
+  document.getElementById('panel-title').textContent = title;
+  document.getElementById('panel-sub').textContent   = sub;
+  document.getElementById('panel-toolbar').innerHTML  = toolbarHtml;
+  document.getElementById('panel-body').innerHTML    = '<div class="loading"><div class="spinner"></div><div>Chargement…</div></div>';
+  document.getElementById('panel-overlay').classList.add('open');
+  bodyFn();
+}
+function closePanel(){
+  document.getElementById('panel-overlay').classList.remove('open');
+  currentReportId = null;
+}
+function maybeClose(e){
+  if(e.target===document.getElementById('panel-overlay')) closePanel();
+}
+
+// ══ DATE HELPERS ══
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function monthStart(){ const d=new Date(); d.setDate(1); return d.toISOString().split('T')[0]; }
+function fmtDate(s){ return new Date(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+function fmtTime(s){ return new Date(s).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
+function diffHours(a,b){ return ((new Date(b)-new Date(a))/3600000).toFixed(1); }
+
+// ══ OPEN REPORT ══
+async function openReport(id){
+  currentReportId = id;
+  const today = todayStr();
+  const ms = monthStart();
+
+  if(id==='heures-total'){
+    openPanel('Rapport total des heures','Heures travaillées par employé',
+      `<input class="fi fi-date" type="date" id="r-from" value="${ms}"/>
+       <input class="fi fi-date" type="date" id="r-to"   value="${today}"/>
+       <button class="btn btn-yellow btn-sm" onclick="genHeuresTotal()">Générer</button>
+       <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>`,
+      genHeuresTotal);
+  }
+  else if(id==='heures-synthese'){
+    openPanel('Rapport de synthèse des heures','Comparatif hebdomadaire par employé',
+      `<input class="fi fi-date" type="date" id="r-from" value="${ms}"/>
+       <input class="fi fi-date" type="date" id="r-to"   value="${today}"/>
+       <button class="btn btn-yellow btn-sm" onclick="genHeureSynthese()">Générer</button>
+       <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>`,
+      genHeureSynthese);
+  }
+  else if(id==='presence'){
+    openPanel('Rapport de présence','Présences et absences par employé',
+      `<input class="fi fi-date" type="date" id="r-from" value="${ms}"/>
+       <input class="fi fi-date" type="date" id="r-to"   value="${today}"/>
+       <button class="btn btn-yellow btn-sm" onclick="genPresence()">Générer</button>
+       <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>`,
+      genPresence);
+  }
+  else if(id==='evenements'){
+    openPanel('Rapport des événements','Tous les pointages et événements système',
+      `<input class="fi fi-date" type="date" id="r-from" value="${today}"/>
+       <input class="fi fi-date" type="date" id="r-to"   value="${today}"/>
+       <button class="btn btn-yellow btn-sm" onclick="genEvenements()">Générer</button>
+       <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>`,
+      genEvenements);
+  }
+  else if(id==='productivite'){
+    openPanel('Rapport de productivité','Taux de ponctualité et présence par employé',
+      `<input class="fi fi-date" type="date" id="r-from" value="${ms}"/>
+       <input class="fi fi-date" type="date" id="r-to"   value="${today}"/>
+       <button class="btn btn-yellow btn-sm" onclick="genProductivite()">Générer</button>`,
+      genProductivite);
+  }
+  else if(id==='employes-detail'){
+    openPanel('Rapport détaillé des employés','Liste complète avec statut et accès',
+      `<button class="btn btn-yellow btn-sm" onclick="genEmployesDetail()">Actualiser</button>
+       <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>`,
+      genEmployesDetail);
+  }
+  else if(id==='appareils'){
+    openPanel('Rapport des appareils','Appareils utilisés pour les pointages',
+      `<button class="btn btn-yellow btn-sm" onclick="genAppareils()">Actualiser</button>`,
+      genAppareils);
+  }
+  else if(id==='visages'){
+    openPanel('Rapport biométrique','Enregistrement facial et scores de confiance',
+      `<button class="btn btn-yellow btn-sm" onclick="genVisages()">Actualiser</button>
+       <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>`,
+      genVisages);
+  }
+  else if(id==='custom'){
+    openPanel('Rapport personnalisé','Choisissez vos paramètres',
+      '',
+      genCustomBuilder);
+  }
+}
+
+// ── Util: set body content ──
+function setBody(html){ document.getElementById('panel-body').innerHTML = html; }
+function getFrom(){ return document.getElementById('r-from')?.value || monthStart(); }
+function getTo(){ return document.getElementById('r-to')?.value || todayStr(); }
+
+// ── Badge helper ──
+function typeBadge(t){
+  const m={'entrée':'<span class="badge bg">↑ Entrée</span>',
+    'sortie':'<span class="badge bo">↓ Sortie</span>',
+    'pause':'<span class="badge by">⏸ Pause</span>',
+    'retour':'<span class="badge bb">▶ Retour</span>',
+    'déconnexion':'<span class="badge" style="background:rgba(139,148,158,0.15);color:#8b949e;">↩ Déconnexion</span>'};
+  return m[t]||`<span class="badge">${t}</span>`;
+}
+
+// ══════════════════════════════
+//  RAPPORT HEURES TOTAL
+// ══════════════════════════════
+async function genHeuresTotal(){
+  const from=getFrom(), to=getTo();
+  setBody('<div class="loading"><div class="spinner"></div><div>Calcul des heures…</div></div>');
+  const [emps, pts] = await Promise.all([
+    sbGet('employees','status=eq.actif&order=full_name.asc'),
+    sbGet('pointages',`created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.asc`)
+  ]);
+  // Build per-employee session list
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]={...e,entries:[],totalMin:0,sessions:0});
+  pts.forEach(p=>{
+    if(empMap[p.employee_id]) empMap[p.employee_id].entries.push(p);
+  });
+  // Calculate hours: pair each entrée with the next sortie
+  const rows = emps.map(e=>{
+    const ev = empMap[e.id].entries.filter(p=>p.type==='entrée'||p.type==='sortie');
+    let totalMin=0, sessions=0;
+    for(let i=0;i<ev.length-1;i++){
+      if(ev[i].type==='entrée'&&ev[i+1].type==='sortie'){
+        totalMin+=( new Date(ev[i+1].created_at) - new Date(ev[i].created_at) ) / 60000;
+        sessions++;
+      }
+    }
+    const h=Math.floor(totalMin/60), m=Math.round(totalMin%60);
+    return {name:e.full_name,post:e.post||'—',sessions,totalMin,label:`${h}h${m.toString().padStart(2,'0')}`};
+  });
+
+  const totalPts = pts.length;
+  const totalMin = rows.reduce((a,r)=>a+r.totalMin,0);
+  const totalH = Math.floor(totalMin/60), totalM=Math.round(totalMin%60);
+
+  cachedData.rows = rows;
+  cachedData.headers = ['Employé','Poste','Sessions','Heures totales'];
+
+  setBody(`
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="stat-mini-label">Employés</div><div class="stat-mini-val">${emps.length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Pointages</div><div class="stat-mini-val">${totalPts}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Total</div><div class="stat-mini-val">${totalH}h${totalM.toString().padStart(2,'0')}</div></div>
+    </div>
+    <div class="section-title">Par employé · ${fmtDate(from)} – ${fmtDate(to)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Poste</th><th>Sessions</th><th>Heures totales</th></tr></thead>
+      <tbody>${rows.length?rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong></td>
+        <td class="muted">${r.post}</td>
+        <td class="mono">${r.sessions}</td>
+        <td><span style="font-family:'IBM Plex Mono',monospace;color:var(--yellow);font-weight:600;">${r.label}</span></td>
+      </tr>`).join(''):'<tr><td colspan="4" class="muted" style="text-align:center;padding:24px;">Aucune donnée pour cette période.</td></tr>'}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ Exporter CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentJSON()">⬇ Exporter JSON</button>
+    </div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT HEURES SYNTHÈSE
+// ══════════════════════════════
+async function genHeureSynthese(){
+  const from=getFrom(), to=getTo();
+  setBody('<div class="loading"><div class="spinner"></div><div>Calcul…</div></div>');
+  const [emps, pts] = await Promise.all([
+    sbGet('employees','status=eq.actif&order=full_name.asc'),
+    sbGet('pointages',`created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.asc`)
+  ]);
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]={name:e.full_name,post:e.post||'—',days:{},ptCount:0});
+  pts.forEach(p=>{
+    if(!empMap[p.employee_id]) return;
+    empMap[p.employee_id].ptCount++;
+    const day=p.created_at.split('T')[0];
+    if(!empMap[p.employee_id].days[day]) empMap[p.employee_id].days[day]=[];
+    empMap[p.employee_id].days[day].push(p);
+  });
+  const rows = emps.map(e=>{
+    const emp = empMap[e.id];
+    const daysPresent = Object.keys(emp.days).length;
+    let totalMin=0;
+    Object.values(emp.days).forEach(evs=>{
+      evs.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+      for(let i=0;i<evs.length-1;i++){
+        if(evs[i].type==='entrée'&&evs[i+1].type==='sortie'){
+          totalMin+=(new Date(evs[i+1].created_at)-new Date(evs[i].created_at))/60000;
+        }
+      }
+    });
+    const h=Math.floor(totalMin/60), m=Math.round(totalMin%60);
+    const avg=daysPresent?Math.round(totalMin/daysPresent):0;
+    const ah=Math.floor(avg/60), am=Math.round(avg%60);
+    return {name:emp.name,post:emp.post,daysPresent,totalLabel:`${h}h${m.toString().padStart(2,'0')}`,avgLabel:`${ah}h${am.toString().padStart(2,'0')}`,ptCount:emp.ptCount};
+  });
+
+  cachedData.rows = rows;
+  cachedData.headers = ['Employé','Poste','Jours présents','Total heures','Moy/jour','Pointages'];
+
+  setBody(`
+    <div class="section-title">Synthèse · ${fmtDate(from)} – ${fmtDate(to)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Poste</th><th>Jours présents</th><th>Total heures</th><th>Moy / jour</th><th>Pointages</th></tr></thead>
+      <tbody>${rows.length?rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong></td>
+        <td class="muted">${r.post}</td>
+        <td class="mono">${r.daysPresent}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:var(--yellow);font-weight:600;">${r.totalLabel}</td>
+        <td class="mono muted">${r.avgLabel}</td>
+        <td class="mono">${r.ptCount}</td>
+      </tr>`).join(''):'<tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">Aucune donnée.</td></tr>'}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ Exporter CSV</button>
+    </div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT PRÉSENCE
+// ══════════════════════════════
+async function genPresence(){
+  const from=getFrom(), to=getTo();
+  setBody('<div class="loading"><div class="spinner"></div><div>Calcul…</div></div>');
+  const [emps, pts] = await Promise.all([
+    sbGet('employees','status=eq.actif&order=full_name.asc'),
+    sbGet('pointages',`type=eq.entrée&created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.asc`)
+  ]);
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]={name:e.full_name,post:e.post||'—',days:new Set()});
+  pts.forEach(p=>{
+    if(empMap[p.employee_id]) empMap[p.employee_id].days.add(p.created_at.split('T')[0]);
+  });
+
+  // Count business days in range
+  let businessDays=0;
+  const cur=new Date(from);
+  const end=new Date(to);
+  while(cur<=end){ if(cur.getDay()!==0&&cur.getDay()!==6) businessDays++; cur.setDate(cur.getDate()+1); }
+
+  const rows = emps.map(e=>{
+    const emp=empMap[e.id];
+    const present=emp.days.size;
+    const absent=Math.max(0,businessDays-present);
+    const rate=businessDays>0?Math.round(present/businessDays*100):0;
+    return {name:emp.name,post:emp.post,present,absent,rate};
+  });
+
+  cachedData.rows=rows;
+  cachedData.headers=['Employé','Poste','Jours présents','Jours absents','Taux de présence (%)'];
+
+  const avg=rows.length?Math.round(rows.reduce((a,r)=>a+r.rate,0)/rows.length):0;
+
+  setBody(`
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="stat-mini-label">Jours ouvrés</div><div class="stat-mini-val">${businessDays}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Effectif</div><div class="stat-mini-val">${emps.length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Taux moy.</div><div class="stat-mini-val">${avg}%</div></div>
+    </div>
+    <div class="section-title">Présence · ${fmtDate(from)} – ${fmtDate(to)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Poste</th><th>Présents</th><th>Absents</th><th>Taux</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong></td>
+        <td class="muted">${r.post}</td>
+        <td class="mono" style="color:var(--green);">${r.present}</td>
+        <td class="mono" style="color:var(--orange);">${r.absent}</td>
+        <td>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:${r.rate>=80?'var(--green)':r.rate>=50?'var(--yellow)':'var(--orange)'};">${r.rate}%</div>
+          <div class="conf-bar"><div class="conf-fill" style="width:${r.rate}%;background:${r.rate>=80?'var(--green)':r.rate>=50?'var(--yellow)':'var(--orange)'}"></div></div>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ Exporter CSV</button>
+    </div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT ÉVÉNEMENTS
+// ══════════════════════════════
+async function genEvenements(){
+  const from=getFrom(), to=getTo();
+  setBody('<div class="loading"><div class="spinner"></div><div>Chargement…</div></div>');
+  const [emps, pts] = await Promise.all([
+    sbGet('employees',''),
+    sbGet('pointages',`created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.desc&limit=200`)
+  ]);
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]=e);
+  cachedData.rows=pts.map(p=>{
+    const e=empMap[p.employee_id]||{full_name:'Inconnu',post:'—'};
+    return {Employé:e.full_name,Poste:e.post||'—',Type:p.type,Date:fmtDate(p.created_at),Heure:fmtTime(p.created_at),Confiance:p.face_confidence||'—',GPS:`${p.latitude||'—'},${p.longitude||'—'}`};
+  });
+  cachedData.headers=['Employé','Poste','Type','Date','Heure','Confiance','GPS'];
+
+  setBody(`
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="stat-mini-label">Événements</div><div class="stat-mini-val">${pts.length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Employés</div><div class="stat-mini-val">${new Set(pts.map(p=>p.employee_id)).size}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Période</div><div class="stat-mini-val" style="font-size:0.9rem;">${fmtDate(from)}</div></div>
+    </div>
+    <div class="section-title">Événements · ${fmtDate(from)} – ${fmtDate(to)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Type</th><th>Date</th><th>Heure</th><th>Confiance</th><th>GPS</th></tr></thead>
+      <tbody>${pts.length?pts.map(p=>{
+        const e=empMap[p.employee_id]||{full_name:'Inconnu'};
+        const conf=p.face_confidence!=null?parseFloat(p.face_confidence):null;
+        return `<tr>
+          <td><strong>${e.full_name}</strong></td>
+          <td>${typeBadge(p.type)}</td>
+          <td class="mono muted">${fmtDate(p.created_at)}</td>
+          <td class="mono">${fmtTime(p.created_at)}</td>
+          <td>${conf!=null?`<div class="mono">${conf.toFixed(1)}%</div><div class="conf-bar"><div class="conf-fill" style="width:${Math.min(conf,100)}%"></div></div>`:'<span class="muted">Manuel</span>'}</td>
+          <td class="mono muted" style="font-size:0.7rem;">${p.latitude?parseFloat(p.latitude).toFixed(3)+', '+parseFloat(p.longitude).toFixed(3):'—'}</td>
+        </tr>`;
+      }).join(''):'<tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">Aucun événement.</td></tr>'}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentJSON()">⬇ JSON</button>
+    </div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT PRODUCTIVITÉ
+// ══════════════════════════════
+async function genProductivite(){
+  const from=getFrom(), to=getTo();
+  setBody('<div class="loading"><div class="spinner"></div><div>Calcul…</div></div>');
+  const [emps, pts] = await Promise.all([
+    sbGet('employees','status=eq.actif&order=full_name.asc'),
+    sbGet('pointages',`created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.asc`)
+  ]);
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]={name:e.full_name,post:e.post||'—',entries:[],confScores:[]});
+  pts.forEach(p=>{
+    if(empMap[p.employee_id]){
+      empMap[p.employee_id].entries.push(p);
+      if(p.face_confidence!=null) empMap[p.employee_id].confScores.push(parseFloat(p.face_confidence));
+    }
+  });
+  let busD=0; const cur=new Date(from),end=new Date(to);
+  while(cur<=end){if(cur.getDay()!==0&&cur.getDay()!==6)busD++;cur.setDate(cur.getDate()+1);}
+
+  const rows=emps.map(e=>{
+    const emp=empMap[e.id];
+    const days=new Set(emp.entries.filter(p=>p.type==='entrée').map(p=>p.created_at.split('T')[0])).size;
+    const rate=busD>0?Math.round(days/busD*100):0;
+    const avgConf=emp.confScores.length?Math.round(emp.confScores.reduce((a,b)=>a+b,0)/emp.confScores.length):null;
+    return {name:emp.name,post:emp.post,days,rate,avgConf,manuals:emp.entries.filter(p=>p.face_confidence==null&&p.type!=='déconnexion').length};
+  });
+
+  setBody(`
+    <div class="section-title">Productivité · ${fmtDate(from)} – ${fmtDate(to)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Poste</th><th>Taux présence</th><th>Conf. Face++ moy.</th><th>Pointages manuels</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong></td>
+        <td class="muted">${r.post}</td>
+        <td>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:${r.rate>=80?'var(--green)':r.rate>=50?'var(--yellow)':'var(--orange)'};">${r.rate}%</div>
+          <div class="conf-bar"><div class="conf-fill" style="width:${r.rate}%;background:${r.rate>=80?'var(--green)':r.rate>=50?'var(--yellow)':'var(--orange)'}"></div></div>
+        </td>
+        <td>${r.avgConf!=null?`<div class="mono">${r.avgConf}%</div><div class="conf-bar"><div class="conf-fill" style="width:${r.avgConf}%"></div></div>`:'<span class="muted">—</span>'}</td>
+        <td class="mono ${r.manuals>0?'':'muted'}" style="${r.manuals>0?'color:var(--orange);':''}">${r.manuals||'0'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT EMPLOYÉS DÉTAIL
+// ══════════════════════════════
+async function genEmployesDetail(){
+  setBody('<div class="loading"><div class="spinner"></div><div>Chargement…</div></div>');
+  const emps = await sbGet('employees','order=full_name.asc');
+  cachedData.rows=emps;
+  cachedData.headers=['Nom','Poste','Email','Téléphone','Token','Visage','Statut'];
+  setBody(`
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="stat-mini-label">Total</div><div class="stat-mini-val">${emps.length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Actifs</div><div class="stat-mini-val" style="color:var(--green);">${emps.filter(e=>e.status==='actif').length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Biométrie</div><div class="stat-mini-val">${emps.filter(e=>e.face_token).length}</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Nom</th><th>Poste</th><th>Email</th><th>Token</th><th>Visage</th><th>Statut</th></tr></thead>
+      <tbody>${emps.map(e=>`<tr>
+        <td><strong>${e.full_name}</strong></td>
+        <td class="muted">${e.post||'—'}</td>
+        <td class="mono muted" style="font-size:0.72rem;">${e.email||'—'}</td>
+        <td><span class="badge" style="background:rgba(188,140,255,0.12);color:var(--purple);">${e.login_token||'—'}</span></td>
+        <td>${e.face_token?'<span class="badge bg">✓</span>':'<span class="badge bo">✗</span>'}</td>
+        <td><span class="badge ${e.status==='actif'?'bg':'bo'}">${e.status}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>
+    </div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT APPAREILS
+// ══════════════════════════════
+async function genAppareils(){
+  setBody('<div class="loading"><div class="spinner"></div><div>Chargement…</div></div>');
+  const pts = await sbGet('pointages','order=created_at.desc&limit=1000');
+  const emps = await sbGet('employees','');
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]=e);
+  // Derive unique "devices" as employees who have pointed at least once
+  const devMap={};
+  pts.forEach(p=>{
+    if(!devMap[p.employee_id]){
+      devMap[p.employee_id]={
+        emp:empMap[p.employee_id]||{full_name:'Inconnu',post:'—'},
+        firstSeen:p.created_at, lastSeen:p.created_at, count:0,
+        hasGPS:false, hasFace:false
+      };
+    }
+    devMap[p.employee_id].lastSeen=p.created_at;
+    devMap[p.employee_id].count++;
+    if(p.latitude) devMap[p.employee_id].hasGPS=true;
+    if(p.face_confidence!=null) devMap[p.employee_id].hasFace=true;
+  });
+  const rows=Object.values(devMap);
+  setBody(`
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="stat-mini-label">Appareils</div><div class="stat-mini-val">${rows.length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Avec GPS</div><div class="stat-mini-val">${rows.filter(r=>r.hasGPS).length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Face++</div><div class="stat-mini-val">${rows.filter(r=>r.hasFace).length}</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Poste</th><th>Pointages</th><th>GPS</th><th>Biométrie</th><th>Dernière activité</th></tr></thead>
+      <tbody>${rows.length?rows.map(r=>`<tr>
+        <td><strong>${r.emp.full_name}</strong></td>
+        <td class="muted">${r.emp.post||'—'}</td>
+        <td class="mono">${r.count}</td>
+        <td>${r.hasGPS?'<span class="badge bg">Actif</span>':'<span class="badge bo">—</span>'}</td>
+        <td>${r.hasFace?'<span class="badge bg">Face++</span>':'<span class="badge by">Manuel</span>'}</td>
+        <td class="mono muted" style="font-size:0.72rem;">${fmtDate(r.lastSeen)} ${fmtTime(r.lastSeen)}</td>
+      </tr>`).join(''):'<tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">Aucune donnée.</td></tr>'}</tbody>
+    </table></div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT BIOMÉTRIQUE
+// ══════════════════════════════
+async function genVisages(){
+  setBody('<div class="loading"><div class="spinner"></div><div>Chargement…</div></div>');
+  const [emps, pts] = await Promise.all([
+    sbGet('employees','order=full_name.asc'),
+    sbGet('pointages','face_confidence=not.is.null&order=created_at.desc')
+  ]);
+  const confMap={};
+  pts.forEach(p=>{
+    if(!confMap[p.employee_id]) confMap[p.employee_id]=[];
+    confMap[p.employee_id].push(parseFloat(p.face_confidence));
+  });
+  const rows=emps.map(e=>{
+    const scores=confMap[e.id]||[];
+    const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null;
+    return {name:e.full_name,post:e.post||'—',hasface:!!e.face_token,scans:scores.length,avg};
+  });
+  cachedData.rows=rows;
+  cachedData.headers=['Employé','Poste','Visage enregistré','Scans Face++','Score moy. (%)'];
+  setBody(`
+    <div class="stat-mini-row">
+      <div class="stat-mini"><div class="stat-mini-label">Enregistrés</div><div class="stat-mini-val" style="color:var(--green);">${rows.filter(r=>r.hasface).length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Non enreg.</div><div class="stat-mini-val" style="color:var(--orange);">${rows.filter(r=>!r.hasface).length}</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Scans tot.</div><div class="stat-mini-val">${pts.length}</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Poste</th><th>Visage</th><th>Scans</th><th>Score moy.</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td><strong>${r.name}</strong></td>
+        <td class="muted">${r.post}</td>
+        <td>${r.hasface?'<span class="badge bg">✓ Enregistré</span>':'<span class="badge bo">Non enregistré</span>'}</td>
+        <td class="mono">${r.scans}</td>
+        <td>${r.avg!=null?`<div class="mono">${r.avg}%</div><div class="conf-bar"><div class="conf-fill" style="width:${r.avg}%"></div></div>`:'<span class="muted">—</span>'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>
+    </div>`);
+}
+
+// ══════════════════════════════
+//  RAPPORT PERSONNALISÉ (builder)
+// ══════════════════════════════
+async function genCustomBuilder(){
+  const emps = await sbGet('employees','order=full_name.asc');
+  setBody(`
+    <div class="section-title">Paramètres du rapport</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <div class="section-title" style="margin-top:0;">Période</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input class="fi fi-date" type="date" id="c-from" value="${monthStart()}"/>
+          <input class="fi fi-date" type="date" id="c-to"   value="${todayStr()}"/>
+        </div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-top:0;">Employé(s)</div>
+        <select class="fi" style="width:100%;" id="c-emp">
+          <option value="">Tous les employés</option>
+          ${emps.map(e=>`<option value="${e.id}">${e.full_name} — ${e.post||'—'}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div class="section-title" style="margin-top:0;">Type d'événement</div>
+        <select class="fi" style="width:100%;" id="c-type">
+          <option value="">Tous les types</option>
+          <option value="entrée">Entrée</option>
+          <option value="sortie">Sortie</option>
+          <option value="pause">Pause</option>
+          <option value="retour">Retour de pause</option>
+          <option value="déconnexion">Déconnexion</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-yellow" style="flex:1;" onclick="runCustomReport()">Générer le rapport</button>
+      </div>
+    </div>
+    <div id="custom-result" style="margin-top:16px;"></div>`);
+}
+
+async function runCustomReport(){
+  const from = document.getElementById('c-from').value;
+  const to   = document.getElementById('c-to').value;
+  const emp  = document.getElementById('c-emp').value;
+  const type = document.getElementById('c-type').value;
+  const el   = document.getElementById('custom-result');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div><div>Chargement…</div></div>';
+
+  let filter = `created_at=gte.${from}T00:00:00&created_at=lte.${to}T23:59:59&order=created_at.desc`;
+  if(emp)  filter += `&employee_id=eq.${emp}`;
+  if(type) filter += `&type=eq.${type}`;
+
+  const [pts, emps] = await Promise.all([sbGet('pointages', filter), sbGet('employees','')]);
+  const empMap={};
+  emps.forEach(e=>empMap[e.id]=e);
+  cachedData.rows=pts;
+  cachedData.headers=['Employé','Type','Date','Heure','Confiance','GPS'];
+
+  el.innerHTML = `
+    <div class="section-title">${pts.length} résultat(s) · ${fmtDate(from)} – ${fmtDate(to)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Employé</th><th>Type</th><th>Date</th><th>Heure</th><th>Confiance</th></tr></thead>
+      <tbody>${pts.length?pts.map(p=>{
+        const e=empMap[p.employee_id]||{full_name:'Inconnu'};
+        const conf=p.face_confidence!=null?parseFloat(p.face_confidence):null;
+        return `<tr>
+          <td><strong>${e.full_name}</strong></td>
+          <td>${typeBadge(p.type)}</td>
+          <td class="mono muted">${fmtDate(p.created_at)}</td>
+          <td class="mono">${fmtTime(p.created_at)}</td>
+          <td>${conf!=null?conf.toFixed(1)+'%':'<span class="muted">Manuel</span>'}</td>
+        </tr>`;}).join(''):'<tr><td colspan="5" class="muted" style="text-align:center;padding:24px;">Aucun résultat.</td></tr>'}</tbody>
+    </table></div>
+    <div class="export-row">
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentCSV()">⬇ CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCurrentJSON()">⬇ JSON</button>
+    </div>`;
+}
+
+// ══════════════════════════════
+//  EXPORT
+// ══════════════════════════════
+function exportCurrentCSV(){
+  if(!cachedData.rows||!cachedData.rows.length){ alert('Aucune donnée à exporter.'); return; }
+  const rows=cachedData.rows;
+  const headers=cachedData.headers;
+  let csv;
+  if(headers && typeof rows[0]==='object' && !Array.isArray(rows[0])){
+    // plain object rows
+    const keys=Object.keys(rows[0]);
+    csv=[keys.join(','),...rows.map(r=>keys.map(k=>`"${r[k]??''}"`).join(','))].join('\n');
+  } else {
+    csv=[headers.join(','),...rows.map(r=>headers.map((_,i)=>`"${r[i]??r??''}"`).join(','))].join('\n');
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='lightcheck-rapport.csv'; a.click();
+}
+function exportCurrentJSON(){
+  if(!cachedData.rows||!cachedData.rows.length){ alert('Aucune donnée à exporter.'); return; }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(cachedData.rows,null,2)],{type:'application/json'}));
+  a.download='lightcheck-rapport.json'; a.click();
+}
+
+// ── Contextual menu (simple) ──
+function showMenu(e, id){
+  // Just open the report panel for now
+  openReport(id);
+}
+</script>
+</body>
+</html>

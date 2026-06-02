@@ -1,6 +1,9 @@
 {
   "name": "lightcheck",
   "scripts": {
-    "start": "npx serve . -l 5000"
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }
