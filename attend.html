@@ -380,11 +380,6 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
       <div class="tc-face-ring"></div>
       <div class="tc-scan"></div>
     </div>
-    <div class="cam-start-overlay" id="cam-start-overlay">
-      <div class="cam-start-icon">📷</div>
-      <div class="cam-start-txt">Appuyez pour démarrer la caméra</div>
-      <button class="cam-start-btn" onclick="startCamera()">Démarrer</button>
-    </div>
     <div class="gps-overlay" id="gps-overlay" style="display:none;">
       <div class="gps-dot"></div>
       <span id="gps-text">GPS…</span>
@@ -404,8 +399,8 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
       <button class="type-btn" onclick="setType('retour',this)">▶ Retour</button>
     </div>
     <div class="capture-row">
-      <button class="capture-btn" id="btn-capture" onclick="captureAndPointage()" disabled>
-        <span id="btn-capture-label">📷</span>
+      <button class="capture-btn" id="btn-capture" onclick="handleCapture()">
+        <span id="btn-capture-label">▶</span>
       </button>
       <button class="manual-btn" onclick="manualPointage()">Manuel</button>
     </div>
@@ -708,6 +703,8 @@ async function doLogout(){
   stopStream(stream); stream=null;
   stopStream(regStream); regStream=null;
   currentEmp=null; currentCompany=null; currentLoc=null;
+  cameraReady=false;
+  document.getElementById('btn-capture-label').textContent='▶';
   document.getElementById('login-token').value='';
   showScreen('login');
 }
@@ -865,21 +862,32 @@ function startGPS(){
 }
 
 // ══ CAMERA ══
+let cameraReady = false;
+
+function handleCapture(){
+  if(!cameraReady) startCamera();
+  else captureAndPointage();
+}
+
 async function startCamera(){
+  const btn = document.getElementById('btn-capture');
+  const lbl = document.getElementById('btn-capture-label');
+  lbl.textContent = '⏳';
+  btn.disabled = true;
   try{
-    stream=await navigator.mediaDevices.getUserMedia({
-    video:{
-      facingMode:'user',
-      width:{ideal:720},
-      height:{ideal:1280}
-    },
-    audio:false
-  });
-    document.getElementById('video').srcObject=stream;
-    document.getElementById('cam-start-overlay').style.display='none';
-    document.getElementById('btn-capture').disabled=false;
-    document.getElementById('btn-capture-label').textContent='📷';
-  }catch(e){ alert('Accès caméra refusé : '+e.message); }
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:'user', width:{ideal:720}, height:{ideal:1280} },
+      audio:false
+    });
+    document.getElementById('video').srcObject = stream;
+    cameraReady = true;
+    btn.disabled = false;
+    lbl.textContent = '📷';
+  }catch(e){
+    btn.disabled = false;
+    lbl.textContent = '▶';
+    alert('Accès caméra refusé : ' + e.message);
+  }
 }
 
 function captureFrame(){
