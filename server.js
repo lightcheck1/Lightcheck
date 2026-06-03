@@ -15,7 +15,8 @@ app.get('/admin',    (req, res) => res.sendFile(path.join(__dirname, 'admin.html
 app.get('/index',    (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/rapports', (req, res) => res.sendFile(path.join(__dirname, 'rapports.html')));
 app.get('/users',    (req, res) => res.sendFile(path.join(__dirname, 'users.html')));
-app.get('/groups',   (req, res) => res.sendFile(path.join(__dirname, 'groups.html')));
+app.get('/groups',    (req, res) => res.sendFile(path.join(__dirname, 'groups.html')));
+app.get('/schedules', (req, res) => res.sendFile(path.join(__dirname, 'schedules.html')));
 app.get('/',         (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 function faceppRequest(path, params) {
