@@ -273,78 +273,151 @@ tr:hover td{background:#f9fafb;}
   </div>
 </div>
 
-<!-- ══ MODAL: CRÉER UN HORAIRE ══ -->
+<!-- ══ MODAL: CRÉER UN HORAIRE — ÉTAPE 1: DÉTAILS ══ -->
 <div class="modal-bd" id="modal-schedule">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-body">
+  <div class="modal" style="padding:0;overflow:hidden;">
+    <div class="modal-handle" style="margin:12px auto 0;"></div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;" id="modal-schedule-title">Créer un horaire</div>
-        <button onclick="closeModal('modal-schedule')" style="background:none;border:none;font-size:1.1rem;
-          cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:6px;">✕</button>
-      </div>
+    <!-- HEADER -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;">
+      <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;">Créer un horaire</div>
+      <button onclick="closeModal('modal-schedule')" style="background:none;border:none;font-size:1.1rem;
+        cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:6px;line-height:1;">✕</button>
+    </div>
 
-      <!-- NAME -->
-      <div class="fg">
-        <label class="fl">Nom de l'horaire <span class="fl-req">*</span></label>
-        <input class="fi" id="sc-name" placeholder="Ex : Matin Standard, Nuit…"/>
-      </div>
+    <!-- BREADCRUMB (NCheck: "Schedule details › Add groups or users") -->
+    <div style="padding:0 20px 14px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="color:#1d4ed8;font-size:0.875rem;font-weight:600;">Détails de l'horaire</span>
+      <span style="color:var(--text3);font-size:0.8rem;">›</span>
+      <span id="sc-crumb-2" style="color:var(--text3);font-size:0.875rem;">Ajouter des groupes ou utilisateurs</span>
+    </div>
 
-      <!-- TYPE -->
-      <div class="fg">
-        <label class="fl">Type</label>
-        <select class="fsel" id="sc-type">
-          <option value="fixed">Fixe (heures fixes chaque jour)</option>
-          <option value="flexible">Flexible (durée quotidienne)</option>
-          <option value="open">Ouvert (entrée libre)</option>
-        </select>
-      </div>
+    <!-- STEP 1 BODY -->
+    <div style="overflow-y:auto;max-height:calc(90vh - 190px);padding:16px 20px 20px;">
 
-      <!-- TIME -->
-      <div class="fg">
-        <label class="fl">Plage horaire</label>
-        <div class="time-row">
-          <input class="fi" id="sc-start" type="time" value="08:00"/>
-          <div class="time-sep">—</div>
-          <input class="fi" id="sc-end" type="time" value="17:00"/>
+      <!-- CARD: Informations de base (matching NCheck white bordered card) -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;
+        padding:16px;margin-bottom:18px;">
+
+        <!-- Schedule name -->
+        <div class="fg">
+          <label class="fl">Nom de l'horaire <span class="fl-req">*</span></label>
+          <input class="fi" id="sc-name" placeholder="Nom de l'horaire"
+            style="background:var(--surface);"/>
         </div>
-      </div>
 
-      <!-- DAYS -->
-      <div class="fg">
-        <label class="fl">Jours travaillés</label>
-        <div class="day-picker" id="day-picker">
-          <div class="dp-day sel" data-day="1">Lu</div>
-          <div class="dp-day sel" data-day="2">Ma</div>
-          <div class="dp-day sel" data-day="3">Me</div>
-          <div class="dp-day sel" data-day="4">Je</div>
-          <div class="dp-day sel" data-day="5">Ve</div>
-          <div class="dp-day" data-day="6">Sa</div>
-          <div class="dp-day" data-day="0">Di</div>
-        </div>
-      </div>
-
-      <!-- TOLERANCE -->
-      <div class="fg">
-        <label class="fl">Tolérance (minutes)</label>
-        <div class="form-row">
-          <div>
-            <div style="font-size:0.75rem;color:var(--text2);margin-bottom:4px;">Retard admis</div>
-            <input class="fi" id="sc-late-tol" type="number" min="0" max="120" value="15"
-              style="font-family:'IBM Plex Mono',monospace;"/>
-          </div>
-          <div>
-            <div style="font-size:0.75rem;color:var(--text2);margin-bottom:4px;">Départ anticipé</div>
-            <input class="fi" id="sc-early-tol" type="number" min="0" max="120" value="10"
-              style="font-family:'IBM Plex Mono',monospace;"/>
+        <!-- Repetition: number + period dropdown side-by-side (NCheck style) -->
+        <div class="fg">
+          <label class="fl">Répétition <span class="fl-req">*</span></label>
+          <div style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:8px;
+            overflow:hidden;background:var(--surface);">
+            <input type="number" id="sc-repeat-n" value="1" min="1" max="52"
+              style="flex:1;border:none;padding:9px 12px;font-family:'IBM Plex Mono',monospace;
+              font-size:0.9rem;color:var(--text);background:transparent;outline:none;
+              border-right:1px solid var(--border);min-width:0;"/>
+            <select id="sc-repeat-unit"
+              style="border:none;padding:9px 10px;padding-right:28px;font-family:'Instrument Sans',sans-serif;
+              font-size:0.875rem;color:var(--text);background:transparent;outline:none;
+              appearance:none;cursor:pointer;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23667085' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\");
+              background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="daily">Quotidien</option>
+              <option value="weekly" selected>Hebdomadaire</option>
+              <option value="monthly">Mensuel</option>
+            </select>
           </div>
         </div>
+
+        <!-- Start date -->
+        <div class="fg">
+          <label class="fl">Date de début</label>
+          <div style="position:relative;">
+            <input type="date" id="sc-start-date" class="fi"
+              style="background:var(--surface);padding-right:36px;"/>
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+              font-size:1rem;color:var(--text3);pointer-events:none;">📅</span>
+          </div>
+        </div>
+
+        <!-- End of repetition -->
+        <div style="margin-bottom:0;">
+          <label class="fl" style="margin-bottom:10px;">Fin de répétition</label>
+          <div style="display:flex;align-items:center;gap:20px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.875rem;color:var(--text);">
+              <input type="radio" name="sc-end-mode" value="none" id="sc-end-none" checked
+                onchange="scToggleEndDate()"
+                style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;"/>
+              Pas de date de fin
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.875rem;color:var(--text);">
+              <input type="radio" name="sc-end-mode" value="date" id="sc-end-by"
+                onchange="scToggleEndDate()"
+                style="width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;"/>
+              Se termine le
+            </label>
+          </div>
+          <!-- End date (shown only when "Se termine le" is selected) -->
+          <div id="sc-end-date-wrap" style="display:none;margin-top:10px;position:relative;">
+            <input type="date" id="sc-end-date" class="fi"
+              style="background:var(--surface);padding-right:36px;"/>
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+              font-size:1rem;color:var(--text3);pointer-events:none;">📅</span>
+          </div>
+        </div>
       </div>
 
-      <!-- COLOR -->
+      <!-- CARD: Détails des horaires de travail -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;
+        padding:16px;margin-bottom:18px;">
+        <div style="font-size:0.875rem;font-weight:600;color:var(--text);margin-bottom:14px;">
+          Horaires de travail
+        </div>
+
+        <!-- Plage horaire -->
+        <div class="fg">
+          <label class="fl">Plage horaire</label>
+          <div class="time-row">
+            <input class="fi" id="sc-start" type="time" value="08:00" style="background:var(--surface);"/>
+            <div class="time-sep">—</div>
+            <input class="fi" id="sc-end" type="time" value="17:00" style="background:var(--surface);"/>
+          </div>
+        </div>
+
+        <!-- Jours travaillés -->
+        <div class="fg">
+          <label class="fl">Jours travaillés</label>
+          <div class="day-picker" id="day-picker">
+            <div class="dp-day sel" data-day="1">Lu</div>
+            <div class="dp-day sel" data-day="2">Ma</div>
+            <div class="dp-day sel" data-day="3">Me</div>
+            <div class="dp-day sel" data-day="4">Je</div>
+            <div class="dp-day sel" data-day="5">Ve</div>
+            <div class="dp-day" data-day="6">Sa</div>
+            <div class="dp-day" data-day="0">Di</div>
+          </div>
+        </div>
+
+        <!-- Tolérance -->
+        <div class="fg" style="margin-bottom:0;">
+          <label class="fl">Tolérance (minutes)</label>
+          <div class="form-row">
+            <div>
+              <div style="font-size:0.75rem;color:var(--text2);margin-bottom:4px;">Retard admis</div>
+              <input class="fi" id="sc-late-tol" type="number" min="0" max="120" value="15"
+                style="font-family:'IBM Plex Mono',monospace;background:var(--surface);"/>
+            </div>
+            <div>
+              <div style="font-size:0.75rem;color:var(--text2);margin-bottom:4px;">Départ anticipé</div>
+              <input class="fi" id="sc-early-tol" type="number" min="0" max="120" value="10"
+                style="font-family:'IBM Plex Mono',monospace;background:var(--surface);"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Couleur -->
       <div class="fg">
-        <label class="fl">Couleur</label>
+        <label class="fl">Couleur de l'horaire</label>
         <div class="color-picker" id="color-picker">
           <div class="cp-swatch sel" data-color="#1d4ed8" style="background:#1d4ed8;"></div>
           <div class="cp-swatch" data-color="#12b76a" style="background:#12b76a;"></div>
@@ -361,12 +434,120 @@ tr:hover td{background:#f9fafb;}
       </div>
     </div>
 
-    <div class="modal-footer">
-      <button class="btn-ghost-sm" onclick="closeModal('modal-schedule')">Annuler</button>
-      <button class="btn-blue" id="btn-sc-save" onclick="saveSchedule()">
-        <span id="btn-sc-label">Créer</span>
+    <!-- FOOTER: "Next" button bottom-right only -->
+    <div style="padding:12px 20px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+      <button onclick="scStep1Next()"
+        style="padding:10px 28px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;
+        font-family:'Instrument Sans',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;">
+        Suivant
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CRÉER UN HORAIRE — ÉTAPE 2: GROUPES / UTILISATEURS ══ -->
+<div class="modal-bd" id="modal-schedule-step2">
+  <div class="modal" style="padding:0;overflow:hidden;">
+    <div class="modal-handle" style="margin:12px auto 0;"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;">
+      <div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;">
+        Ajouter des groupes ou utilisateurs
+      </div>
+      <button onclick="closeModal('modal-schedule-step2')" style="background:none;border:none;
+        font-size:1.1rem;cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:6px;">✕</button>
+    </div>
+
+    <!-- BREADCRUMB step 2 active -->
+    <div style="padding:0 20px 14px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="color:var(--green-dark);font-size:0.875rem;font-weight:500;">✓ Détails de l'horaire</span>
+      <span style="color:var(--text3);font-size:0.8rem;">›</span>
+      <span style="color:#1d4ed8;font-size:0.875rem;font-weight:600;">Ajouter des groupes ou utilisateurs</span>
+    </div>
+
+    <div style="overflow-y:auto;max-height:calc(90vh - 200px);padding:16px 20px 20px;">
+
+      <!-- Recap card -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;
+        padding:14px;margin-bottom:16px;">
+        <div style="font-size:0.72rem;font-weight:600;color:var(--text2);text-transform:uppercase;
+          letter-spacing:1px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;">Récapitulatif</div>
+        <div class="detail-row"><span class="detail-key">Nom</span><span class="detail-val" id="s2-sc-name">—</span></div>
+        <div class="detail-row"><span class="detail-key">Répétition</span><span class="detail-val" id="s2-sc-repeat">—</span></div>
+        <div class="detail-row"><span class="detail-key">Plage horaire</span><span class="detail-val" id="s2-sc-time">—</span></div>
+        <div class="detail-row"><span class="detail-key">Date de début</span><span class="detail-val" id="s2-sc-startdate">—</span></div>
+      </div>
+
+      <!-- Assign to groups -->
+      <div class="fg">
+        <label class="fl">Groupes assignés</label>
+        <div id="sc-group-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:24px;"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="sc-group-select">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Assign to employees -->
+      <div class="fg" style="margin-bottom:0;">
+        <label class="fl">Employés assignés</label>
+        <div style="position:relative;">
+          <input class="fi" id="sc-emp-search" type="text" placeholder="Rechercher un employé…"
+            oninput="scFilterEmps(this.value)"
+            onfocus="document.getElementById('sc-emp-dd').style.display='block'"
+            onblur="setTimeout(()=>document.getElementById('sc-emp-dd').style.display='none',200)"
+            autocomplete="off" style="background:var(--surface);"/>
+          <div id="sc-emp-dd" style="display:none;position:absolute;left:0;right:0;top:calc(100%+4px);
+            background:var(--surface);border:1px solid var(--border);border-radius:8px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:400;max-height:180px;overflow-y:auto;"></div>
+        </div>
+        <div id="sc-emp-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+      </div>
+
+      <div id="sc-error-2" class="alert-error" style="display:none;margin-top:12px;">
+        <span>⚠</span><span id="sc-error-msg-2">Erreur.</span>
+      </div>
+    </div>
+
+    <div style="padding:12px 20px 20px;border-top:1px solid var(--border);
+      display:flex;justify-content:space-between;align-items:center;">
+      <button onclick="scGoBack()"
+        style="padding:10px 20px;background:transparent;color:var(--text2);
+        border:1.5px solid var(--border);border-radius:8px;
+        font-family:'Instrument Sans',sans-serif;font-size:0.875rem;cursor:pointer;">
+        ← Retour
+      </button>
+      <button id="btn-sc-save" onclick="saveSchedule()"
+        style="padding:10px 28px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;
+        font-family:'Instrument Sans',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;">
+        <span id="btn-sc-label">Créer l'horaire</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: SUCCÈS CRÉATION ══ -->
+<div class="modal-bd" id="modal-schedule-done">
+  <div class="modal" style="text-align:center;padding:28px 24px 32px;">
+    <div class="modal-handle"></div>
+    <div style="width:64px;height:64px;border-radius:50%;background:var(--green-bg);
+      border:2px solid var(--green-border);display:flex;align-items:center;justify-content:center;
+      font-size:1.8rem;margin:0 auto 16px;">✓</div>
+    <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;">Horaire créé !</div>
+    <div style="color:var(--text2);font-size:0.875rem;margin-bottom:20px;">L'horaire a été enregistré avec succès.</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;
+      text-align:left;margin-bottom:20px;">
+      <div class="detail-row"><span class="detail-key">Nom</span><span class="detail-val" id="done-sc-name">—</span></div>
+      <div class="detail-row"><span class="detail-key">Répétition</span><span class="detail-val" id="done-sc-repeat">—</span></div>
+      <div class="detail-row"><span class="detail-key">Horaire</span><span class="detail-val" id="done-sc-time">—</span></div>
+      <div class="detail-row"><span class="detail-key">Jours</span><span class="detail-val" id="done-sc-days">—</span></div>
+    </div>
+    <button onclick="closeModal('modal-schedule-done');loadSchedules();"
+      style="width:100%;padding:11px;background:transparent;border:1.5px solid var(--border);
+      border-radius:8px;font-family:'Instrument Sans',sans-serif;font-size:0.875rem;
+      cursor:pointer;color:var(--text2);">
+      Fermer
+    </button>
   </div>
 </div>
 
@@ -471,8 +652,9 @@ async function sbDelete(t, q){
 // ══ STATE ══
 let currentTab  = 'schedules';
 let currentPill = 'bio';
-let allSchedules = [];
-let allShifts    = [];
+let allSchedules  = [];
+let allShifts     = [];
+let allEmployees  = [];
 let selectedColor = '#1d4ed8';
 let selectedDays  = new Set([1,2,3,4,5]);
 let detailSchedule = null;
@@ -642,29 +824,30 @@ document.getElementById('color-picker').addEventListener('click', e=>{
   selectedColor = sw.dataset.color;
 });
 
-// ══ CREATE SCHEDULE ══
+// ══ CREATE SCHEDULE: 2-STEP FLOW ══
+let scAssignedGroups = []; // [{id,code}]
+let scAssignedEmps   = []; // [{id,name}]
+let allGroups = [];
+
 function openCreateModal(){
-  if(currentTab === 'shifts'){
-    openShiftModal();
-    return;
-  }
+  if(currentTab === 'shifts'){ openShiftModal(); return; }
   editMode = false;
   detailSchedule = null;
   document.getElementById('sc-name').value = '';
-  document.getElementById('sc-type').value = 'fixed';
+  document.getElementById('sc-repeat-n').value = '1';
+  document.getElementById('sc-repeat-unit').value = 'weekly';
+  document.getElementById('sc-start-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('sc-end-none').checked = true;
+  document.getElementById('sc-end-date-wrap').style.display = 'none';
   document.getElementById('sc-start').value = '08:00';
   document.getElementById('sc-end').value   = '17:00';
   document.getElementById('sc-late-tol').value  = '15';
   document.getElementById('sc-early-tol').value = '10';
   document.getElementById('sc-error').style.display = 'none';
-  document.getElementById('btn-sc-label').textContent = 'Créer';
-  document.getElementById('btn-sc-save').disabled = false;
-  document.getElementById('modal-schedule-title').textContent = 'Créer un horaire';
   // Reset days
   selectedDays = new Set([1,2,3,4,5]);
   document.querySelectorAll('.dp-day').forEach(d=>{
-    const n = parseInt(d.dataset.day);
-    d.classList.toggle('sel', selectedDays.has(n));
+    d.classList.toggle('sel', selectedDays.has(parseInt(d.dataset.day)));
   });
   // Reset color
   selectedColor = '#1d4ed8';
@@ -673,22 +856,145 @@ function openCreateModal(){
   document.getElementById('modal-schedule').classList.add('open');
 }
 
-async function saveSchedule(){
-  const name  = document.getElementById('sc-name').value.trim();
-  const type  = document.getElementById('sc-type').value;
+function scToggleEndDate(){
+  const mode = document.querySelector('[name="sc-end-mode"]:checked')?.value;
+  document.getElementById('sc-end-date-wrap').style.display = mode==='date' ? 'block' : 'none';
+}
+
+function scStep1Next(){
+  const name = document.getElementById('sc-name').value.trim();
+  const errEl = document.getElementById('sc-error');
+  if(!name){ document.getElementById('sc-error-msg').textContent='Le nom de l\'horaire est obligatoire.'; errEl.style.display='flex'; return; }
+  errEl.style.display='none';
+
+  // Build repeat label
+  const n = document.getElementById('sc-repeat-n').value;
+  const unit = document.getElementById('sc-repeat-unit');
+  const unitLabel = unit.options[unit.selectedIndex].text;
+  const startDate = document.getElementById('sc-start-date').value;
   const start = document.getElementById('sc-start').value;
   const end   = document.getElementById('sc-end').value;
-  const lateTol  = parseInt(document.getElementById('sc-late-tol').value)||15;
-  const earlyTol = parseInt(document.getElementById('sc-early-tol').value)||10;
-  const errEl = document.getElementById('sc-error');
 
-  if(!name){ document.getElementById('sc-error-msg').textContent='Le nom est obligatoire.'; errEl.style.display='flex'; return; }
-  errEl.style.display='none';
+  // Fill step 2 recap
+  document.getElementById('s2-sc-name').textContent   = name;
+  document.getElementById('s2-sc-repeat').textContent = `${n} × ${unitLabel}`;
+  document.getElementById('s2-sc-time').textContent   = `${start} — ${end}`;
+  document.getElementById('s2-sc-startdate').textContent = startDate || '—';
+
+  // Reset assignment
+  scAssignedGroups = [];
+  scAssignedEmps   = [];
+  document.getElementById('sc-group-chips').innerHTML = '';
+  document.getElementById('sc-emp-chips').innerHTML   = '';
+  document.getElementById('sc-emp-search').value = '';
+  document.getElementById('sc-error-2').style.display = 'none';
+  document.getElementById('btn-sc-label').textContent = 'Créer l\'horaire';
+  document.getElementById('btn-sc-save').disabled = false;
+
+  // Render group toggle buttons
+  scRenderGroupSelect();
+  scRenderEmpDD('');
+
+  closeModal('modal-schedule');
+  document.getElementById('modal-schedule-step2').classList.add('open');
+}
+
+function scGoBack(){
+  closeModal('modal-schedule-step2');
+  document.getElementById('modal-schedule').classList.add('open');
+}
+
+// Group toggle pills
+async function scRenderGroupSelect(){
+  if(allGroups.length === 0) allGroups = await sbGet('employee_groups','order=code.asc') || [];
+  const wrap = document.getElementById('sc-group-select');
+  if(!allGroups.length){ wrap.innerHTML='<span style="color:var(--text3);font-size:0.82rem;">Aucun groupe disponible</span>'; return; }
+  const sel = new Set(scAssignedGroups.map(g=>g.id));
+  wrap.innerHTML = allGroups.map(g=>`
+    <button onclick="scToggleGroup('${g.id}','${(g.code||'').replace(/'/g,"\\'")}')"
+      style="padding:6px 14px;border-radius:20px;font-family:'Instrument Sans',sans-serif;font-size:0.8rem;
+      cursor:pointer;border:1.5px solid ${sel.has(g.id)?'var(--blue)':'var(--border)'};
+      background:${sel.has(g.id)?'var(--blue-bg)':'var(--surface)'};
+      color:${sel.has(g.id)?'var(--blue)':'var(--text)'};
+      font-weight:${sel.has(g.id)?'600':'400'};transition:all 0.15s;" id="scg-${g.id}">
+      ${g.code}
+    </button>`).join('');
+}
+
+function scToggleGroup(id, code){
+  const idx = scAssignedGroups.findIndex(g=>g.id===id);
+  if(idx>-1) scAssignedGroups.splice(idx,1);
+  else scAssignedGroups.push({id,code});
+  scRenderGroupSelect();
+  // Update chips
+  const chips = document.getElementById('sc-group-chips');
+  chips.innerHTML = scAssignedGroups.map(g=>`
+    <span style="display:inline-flex;align-items:center;gap:5px;background:var(--blue-bg);
+      border:1px solid var(--blue-border);border-radius:20px;padding:3px 10px;font-size:0.78rem;color:var(--blue);">
+      ${g.code}
+      <button onclick="scToggleGroup('${g.id}','${g.code}')"
+        style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.8rem;line-height:1;">✕</button>
+    </span>`).join('');
+}
+
+// Employee dropdown for step 2
+function scFilterEmps(q){
+  scRenderEmpDD(q);
+  document.getElementById('sc-emp-dd').style.display='block';
+}
+function scRenderEmpDD(q){
+  const dd = document.getElementById('sc-emp-dd');
+  const sel = new Set(scAssignedEmps.map(e=>e.id));
+  const matches = allEmployees.filter(e=>
+    !q || (e.full_name||'').toLowerCase().includes(q.toLowerCase())
+  ).slice(0,25);
+  if(!matches.length){ dd.innerHTML='<div style="padding:10px 14px;color:var(--text3);font-size:0.85rem;">Aucun résultat</div>'; return; }
+  dd.innerHTML = matches.map(e=>`
+    <div onmousedown="scToggleEmp('${e.id}','${(e.full_name||'').replace(/'/g,"\\'")}')"
+      style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;
+      font-size:0.875rem;border-bottom:1px solid var(--border);
+      background:${sel.has(e.id)?'var(--blue-bg)':'var(--surface)'};transition:background 0.1s;"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='${sel.has(e.id)?'var(--blue-bg)':'var(--surface)'}'">
+      <span style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${sel.has(e.id)?'#1d4ed8':'var(--border)'};
+        background:${sel.has(e.id)?'#1d4ed8':'transparent'};display:inline-flex;align-items:center;
+        justify-content:center;font-size:0.7rem;color:#fff;flex-shrink:0;">${sel.has(e.id)?'✓':''}</span>
+      ${e.full_name||'—'}
+    </div>`).join('');
+}
+function scToggleEmp(id, name){
+  const idx = scAssignedEmps.findIndex(e=>e.id===id);
+  if(idx>-1) scAssignedEmps.splice(idx,1);
+  else scAssignedEmps.push({id,name});
+  scRenderEmpDD(document.getElementById('sc-emp-search').value);
+  document.getElementById('sc-emp-chips').innerHTML = scAssignedEmps.map(e=>`
+    <span style="display:inline-flex;align-items:center;gap:5px;background:var(--bg);
+      border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:0.78rem;color:var(--text);">
+      ${e.name}
+      <button onclick="scToggleEmp('${e.id}','${e.name.replace(/'/g,"\\'")}')"
+        style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.8rem;line-height:1;">✕</button>
+    </span>`).join('');
+}
+
+async function saveSchedule(){
+  const name      = document.getElementById('sc-name').value.trim();
+  const repeatN   = parseInt(document.getElementById('sc-repeat-n').value)||1;
+  const repeatUnit= document.getElementById('sc-repeat-unit').value;
+  const startDate = document.getElementById('sc-start-date').value;
+  const endMode   = document.querySelector('[name="sc-end-mode"]:checked')?.value;
+  const endDate   = endMode==='date' ? document.getElementById('sc-end-date').value : null;
+  const start     = document.getElementById('sc-start').value;
+  const end       = document.getElementById('sc-end').value;
+  const lateTol   = parseInt(document.getElementById('sc-late-tol').value)||15;
+  const earlyTol  = parseInt(document.getElementById('sc-early-tol').value)||10;
+  const errEl     = document.getElementById('sc-error-2');
+
   document.getElementById('btn-sc-label').innerHTML='<span class="spinner"></span>';
   document.getElementById('btn-sc-save').disabled=true;
 
   const payload = {
-    name, type, start_time:start, end_time:end,
+    name, repeat_n:repeatN, repeat_unit:repeatUnit,
+    start_date:startDate||null, end_date:endDate,
+    start_time:start, end_time:end,
     late_tolerance:lateTol, early_tolerance:earlyTol,
     color:selectedColor, work_days:[...selectedDays]
   };
@@ -696,12 +1002,19 @@ async function saveSchedule(){
   const result = await sbInsert('schedules', payload);
 
   if(result&&(result[0]?.id||result.id)){
-    closeModal('modal-schedule');
-    await loadSchedules();
+    // Fill done modal
+    const unitLabel = document.getElementById('sc-repeat-unit');
+    document.getElementById('done-sc-name').textContent   = name;
+    document.getElementById('done-sc-repeat').textContent = `${repeatN} × ${unitLabel.options[unitLabel.selectedIndex].text}`;
+    document.getElementById('done-sc-time').textContent   = `${start} — ${end}`;
+    const daysArr = [...selectedDays].sort();
+    document.getElementById('done-sc-days').textContent   = daysArr.map(d=>DAY_NAMES[d]).join(', ');
+    closeModal('modal-schedule-step2');
+    document.getElementById('modal-schedule-done').classList.add('open');
   } else {
-    document.getElementById('sc-error-msg').textContent='Erreur : '+(result?.message||result?.error||JSON.stringify(result));
+    document.getElementById('sc-error-msg-2').textContent='Erreur : '+(result?.message||result?.error||JSON.stringify(result));
     errEl.style.display='flex';
-    document.getElementById('btn-sc-label').textContent='Créer';
+    document.getElementById('btn-sc-label').textContent='Créer l\'horaire';
     document.getElementById('btn-sc-save').disabled=false;
   }
 }
@@ -745,15 +1058,23 @@ function editSchedule(){
   closeModal('modal-sc-detail');
   const s = detailSchedule;
   editMode=true;
-  document.getElementById('sc-name').value = s.name||'';
-  document.getElementById('sc-type').value = s.type||'fixed';
-  document.getElementById('sc-start').value = s.start_time||'08:00';
-  document.getElementById('sc-end').value   = s.end_time||'17:00';
-  document.getElementById('sc-late-tol').value  = s.late_tolerance||15;
-  document.getElementById('sc-early-tol').value = s.early_tolerance||10;
+  document.getElementById('sc-name').value         = s.name||'';
+  document.getElementById('sc-repeat-n').value     = s.repeat_n||1;
+  document.getElementById('sc-repeat-unit').value  = s.repeat_unit||'weekly';
+  document.getElementById('sc-start-date').value   = s.start_date||new Date().toISOString().split('T')[0];
+  if(s.end_date){
+    document.getElementById('sc-end-by').checked = true;
+    document.getElementById('sc-end-date').value = s.end_date;
+    document.getElementById('sc-end-date-wrap').style.display='block';
+  } else {
+    document.getElementById('sc-end-none').checked = true;
+    document.getElementById('sc-end-date-wrap').style.display='none';
+  }
+  document.getElementById('sc-start').value        = s.start_time||'08:00';
+  document.getElementById('sc-end').value          = s.end_time||'17:00';
+  document.getElementById('sc-late-tol').value     = s.late_tolerance||15;
+  document.getElementById('sc-early-tol').value    = s.early_tolerance||10;
   document.getElementById('sc-error').style.display='none';
-  document.getElementById('btn-sc-label').textContent='Enregistrer';
-  document.getElementById('modal-schedule-title').textContent='Modifier l\'horaire';
   selectedDays = new Set(s.work_days||[1,2,3,4,5]);
   document.querySelectorAll('.dp-day').forEach(d=>{
     d.classList.toggle('sel', selectedDays.has(parseInt(d.dataset.day)));
@@ -815,6 +1136,7 @@ function closeModal(id){ document.getElementById(id)?.classList.remove('open'); 
 // ══ INIT ══
 loadSchedules();
 loadShifts();
+(async()=>{ allEmployees = await sbGet('employees','order=full_name.asc&select=id,full_name') || []; })();
 </script>
 </body>
 </html>
