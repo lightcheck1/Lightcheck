@@ -301,54 +301,212 @@ textarea.fi{resize:vertical;min-height:80px;}
   </div>
 </div>
 
-<!-- ══ MODAL: CRÉER UN GROUPE ══ -->
+<!-- ══ MODAL: CRÉER UN GROUPE — STEP 1 ══ -->
 <div class="modal-bd" id="modal-create">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-body">
+  <div class="modal" style="padding:0;overflow:hidden;">
+    <div class="modal-handle" style="margin:12px auto 0;"></div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;">Créer un groupe</div>
-        <button onclick="closeModal('modal-create')" style="background:none;border:none;font-size:1.1rem;
-          cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:6px;line-height:1;">✕</button>
+    <!-- HEADER -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;">
+      <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;">Ajouter un groupe d'utilisateurs</div>
+      <button onclick="closeModal('modal-create')" style="background:none;border:none;font-size:1.1rem;
+        cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:6px;line-height:1;">✕</button>
+    </div>
+
+    <!-- BREADCRUMB (NCheck style: "Détails du groupe > Ajouter des utilisateurs" then "› Enregistrer appareil") -->
+    <div style="padding:0 20px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+        <span style="color:#1d4ed8;font-size:0.875rem;font-weight:600;cursor:pointer;" onclick="cgGoStep(1)">Détails du groupe</span>
+        <span style="color:var(--text3);font-size:0.8rem;">›</span>
+        <span id="cg-crumb-2" style="color:var(--text3);font-size:0.875rem;cursor:pointer;" onclick="cgGoStep(2)">Ajouter des utilisateurs</span>
       </div>
-
-      <div class="fg">
-        <label class="fl">Code du groupe <span style="color:var(--red);">*</span></label>
-        <input class="fi" id="cg-code" placeholder="Ex : ADMIN, RH, CAISSE…"
-          oninput="this.value=this.value.toUpperCase()"/>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--text3);font-size:0.8rem;">›</span>
+        <span id="cg-crumb-3" style="color:var(--text3);font-size:0.875rem;cursor:pointer;" onclick="cgGoStep(3)">Enregistrer un appareil partagé</span>
       </div>
+    </div>
 
-      <div class="fg">
-        <label class="fl">Description</label>
-        <textarea class="fi" id="cg-desc" placeholder="Description optionnelle du groupe…"></textarea>
-      </div>
+    <!-- STEP 1 BODY -->
+    <div id="cg-step-1" style="overflow-y:auto;max-height:calc(90vh - 200px);padding:16px 20px 20px;">
 
-      <div class="fg">
-        <label class="fl">Membres <span style="color:var(--text3);font-weight:400;">(optionnel)</span></label>
-        <div class="member-select-wrap">
-          <input class="member-select-input" id="member-search" type="text"
-            placeholder="Rechercher un employé…"
-            oninput="filterMemberDropdown(this.value)"
-            onfocus="document.getElementById('member-dropdown').classList.add('open')"
-            onblur="setTimeout(()=>document.getElementById('member-dropdown').classList.remove('open'),200)"
-            autocomplete="off"/>
-          <div class="member-dropdown" id="member-dropdown" id="member-dropdown-list"></div>
+      <!-- GROUP INFORMATION CARD (white card with border like screenshot) -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:18px;">
+        <div style="font-size:0.9rem;font-weight:600;margin-bottom:14px;color:var(--text);">Informations du groupe</div>
+
+        <div class="fg">
+          <label class="fl" style="color:var(--text);font-size:0.875rem;text-transform:none;letter-spacing:0;font-weight:500;margin-bottom:6px;">
+            Code du groupe <span style="color:var(--red);">*</span>
+          </label>
+          <input class="fi" id="cg-code" placeholder="Code du groupe"
+            oninput="this.value=this.value.toUpperCase()"
+            style="background:var(--surface);"/>
         </div>
-        <div class="member-chips" id="member-chips"></div>
+
+        <div class="fg" style="margin-bottom:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <label class="fl" style="color:var(--text);font-size:0.875rem;text-transform:none;letter-spacing:0;font-weight:500;margin:0;">
+              Description <span style="color:var(--red);">*</span>
+            </label>
+            <span style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text3);
+              display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;
+              color:var(--text3);cursor:help;flex-shrink:0;"
+              title="Décrivez brièvement la fonction de ce groupe.">?</span>
+          </div>
+          <input class="fi" id="cg-desc" placeholder="Description"
+            style="background:var(--surface);"/>
+        </div>
       </div>
 
-      <div id="create-error" class="alert alert-error" style="display:none;">
+      <!-- PROFILE PHOTO (landscape, group silhouette) -->
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span style="font-size:0.875rem;font-weight:500;color:var(--text);">Photo de profil :</span>
+          <span style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text3);
+            display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;
+            color:var(--text3);cursor:help;flex-shrink:0;"
+            title="Photo optionnelle représentant ce groupe.">?</span>
+        </div>
+
+        <!-- Landscape placeholder with group silhouette (3 people) -->
+        <div id="cg-photo-preview" style="width:100%;height:160px;border-radius:8px;
+          background:#d0d5dd;overflow:hidden;
+          display:flex;align-items:center;justify-content:center;margin-bottom:10px;position:relative;">
+          <img id="cg-photo-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;"/>
+          <!-- Group SVG: 3-person silhouette like the NCheck screenshot -->
+          <svg id="cg-photo-svg" width="140" height="90" viewBox="0 0 140 90" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.4;">
+            <!-- Left person -->
+            <circle cx="40" cy="28" r="14" fill="#98a2b3"/>
+            <path d="M10 80c0-16.569 13.431-30 30-30s30 13.431 30 30" fill="#98a2b3"/>
+            <!-- Right person -->
+            <circle cx="100" cy="28" r="14" fill="#98a2b3"/>
+            <path d="M70 80c0-16.569 13.431-30 30-30s30 13.431 30 30" fill="#98a2b3"/>
+            <!-- Center person (front, slightly larger) -->
+            <circle cx="70" cy="22" r="16" fill="#667085"/>
+            <path d="M36 82c0-18.778 15.222-34 34-34s34 15.222 34 34" fill="#667085"/>
+          </svg>
+        </div>
+
+        <input type="file" id="cg-photo-file" accept="image/*" style="display:none;" onchange="cgHandlePhoto(this)"/>
+        <button onclick="document.getElementById('cg-photo-file').click()"
+          style="width:100%;padding:10px;background:var(--surface);border:1.5px solid var(--border);
+          border-radius:8px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:0.875rem;
+          cursor:pointer;margin-bottom:8px;transition:background 0.15s;"
+          onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--surface)'">
+          Télécharger une photo
+        </button>
+        <button id="cg-remove-btn" onclick="cgRemovePhoto()"
+          style="width:100%;padding:10px;background:var(--surface);border:1.5px solid var(--border);
+          border-radius:8px;color:var(--red);font-family:'Instrument Sans',sans-serif;font-size:0.875rem;
+          cursor:pointer;display:none;transition:background 0.15s;"
+          onmouseover="this.style.background='var(--red-bg)'" onmouseout="this.style.background='var(--surface)'">
+          Supprimer l'image
+        </button>
+      </div>
+
+      <div id="create-error" class="alert alert-error" style="display:none;margin-top:12px;">
         <span>⚠</span><span id="create-error-msg">Erreur.</span>
       </div>
     </div>
 
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('modal-create')">Annuler</button>
-      <button class="btn-primary" id="btn-save" onclick="saveGroup()">
-        <span id="btn-save-label">Créer</span>
+    <!-- FOOTER -->
+    <div style="padding:12px 20px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+      <button onclick="cgStep1Next()"
+        style="padding:10px 28px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;
+        font-family:'Instrument Sans',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;">
+        Suivant
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CRÉER — STEP 2: AJOUTER DES UTILISATEURS ══ -->
+<div class="modal-bd" id="modal-create-step2">
+  <div class="modal" style="padding:0;overflow:hidden;">
+    <div class="modal-handle" style="margin:12px auto 0;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;">
+      <div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;">Ajouter des utilisateurs</div>
+      <button onclick="closeModal('modal-create-step2')" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:6px;">✕</button>
+    </div>
+
+    <!-- breadcrumb -->
+    <div style="padding:0 20px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+        <span style="color:var(--green-dark);font-size:0.875rem;font-weight:500;cursor:pointer;" onclick="cgGoStep(1)">✓ Détails du groupe</span>
+        <span style="color:var(--text3);font-size:0.8rem;">›</span>
+        <span style="color:#1d4ed8;font-size:0.875rem;font-weight:600;">Ajouter des utilisateurs</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--text3);font-size:0.8rem;">›</span>
+        <span style="color:var(--text3);font-size:0.875rem;">Enregistrer un appareil partagé</span>
+      </div>
+    </div>
+
+    <div style="overflow-y:auto;max-height:calc(90vh - 200px);padding:16px 20px 20px;">
+      <div class="fg">
+        <label class="fl" style="color:var(--text);font-size:0.875rem;text-transform:none;letter-spacing:0;font-weight:500;margin-bottom:8px;">
+          Rechercher des employés à ajouter
+        </label>
+        <div class="member-select-wrap">
+          <input class="member-select-input" id="member-search" type="text"
+            placeholder="Nom de l'employé…"
+            oninput="filterMemberDropdown(this.value)"
+            onfocus="document.getElementById('member-dropdown').classList.add('open')"
+            onblur="setTimeout(()=>document.getElementById('member-dropdown').classList.remove('open'),200)"
+            autocomplete="off"/>
+          <div class="member-dropdown" id="member-dropdown"></div>
+        </div>
+        <div class="member-chips" id="member-chips" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- recap -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);text-transform:uppercase;
+          letter-spacing:1px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;">Récapitulatif</div>
+        <div class="detail-row"><span class="detail-key">Code</span><span class="detail-val" id="s2-code">—</span></div>
+        <div class="detail-row"><span class="detail-key">Description</span><span class="detail-val" id="s2-desc">—</span></div>
+        <div class="detail-row"><span class="detail-key">Membres sélectionnés</span><span class="detail-val" id="s2-count">0</span></div>
+      </div>
+
+      <div id="create-error-2" class="alert alert-error" style="display:none;margin-top:12px;">
+        <span>⚠</span><span id="create-error-msg-2">Erreur.</span>
+      </div>
+    </div>
+
+    <div style="padding:12px 20px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;">
+      <button onclick="cgGoStep(1)"
+        style="padding:10px 20px;background:transparent;color:var(--text2);border:1.5px solid var(--border);
+        border-radius:8px;font-family:'Instrument Sans',sans-serif;font-size:0.875rem;cursor:pointer;">
+        ← Retour
+      </button>
+      <button id="btn-save" onclick="saveGroup()"
+        style="padding:10px 28px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;
+        font-family:'Instrument Sans',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;">
+        <span id="btn-save-label">Créer le groupe</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CRÉER — STEP 3: SUCCÈS ══ -->
+<div class="modal-bd" id="modal-create-step3">
+  <div class="modal" style="text-align:center;padding:28px 24px 32px;">
+    <div class="modal-handle"></div>
+    <div style="width:64px;height:64px;border-radius:50%;background:var(--green-bg);
+      border:2px solid var(--green-border);display:flex;align-items:center;justify-content:center;
+      font-size:1.8rem;margin:0 auto 14px;">✓</div>
+    <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;">Groupe créé !</div>
+    <div style="color:var(--text2);font-size:0.875rem;margin-bottom:20px;">Le groupe a été ajouté avec succès.</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;
+      text-align:left;margin-bottom:20px;">
+      <div class="detail-row"><span class="detail-key">Code</span><span class="detail-val" id="s3-code">—</span></div>
+      <div class="detail-row"><span class="detail-key">Description</span><span class="detail-val" id="s3-desc">—</span></div>
+      <div class="detail-row"><span class="detail-key">Membres</span><span class="detail-val" id="s3-count">—</span></div>
+    </div>
+    <button onclick="closeModal('modal-create-step3');loadGroups();"
+      style="width:100%;padding:11px;background:transparent;border:1.5px solid var(--border);
+      border-radius:8px;font-family:'Instrument Sans',sans-serif;font-size:0.875rem;cursor:pointer;color:var(--text2);">
+      Fermer
+    </button>
   </div>
 </div>
 
@@ -665,28 +823,79 @@ function renderChips(){
 }
 
 // ══ CREATE ══
+let cgPhotoB64 = null;
+
 function openCreateModal(){
   document.getElementById('cg-code').value = '';
   document.getElementById('cg-desc').value = '';
+  document.getElementById('create-error').style.display = 'none';
+  cgRemovePhoto();
+  chosenMembers = [];
+  document.getElementById('modal-create').classList.add('open');
+}
+
+function cgGoStep(n){
+  closeModal('modal-create');
+  closeModal('modal-create-step2');
+  closeModal('modal-create-step3');
+  if(n===1) document.getElementById('modal-create').classList.add('open');
+  else if(n===2) document.getElementById('modal-create-step2').classList.add('open');
+  else if(n===3) document.getElementById('modal-create-step3').classList.add('open');
+}
+
+function cgStep1Next(){
+  const code = document.getElementById('cg-code').value.trim().toUpperCase();
+  const desc = document.getElementById('cg-desc').value.trim();
+  const err  = document.getElementById('create-error');
+  const errM = document.getElementById('create-error-msg');
+  if(!code){ errM.textContent='Le code du groupe est obligatoire.'; err.style.display='flex'; return; }
+  if(!desc){ errM.textContent='La description est obligatoire.'; err.style.display='flex'; return; }
+  err.style.display='none';
+  // Prefill recap in step 2
+  document.getElementById('s2-code').textContent = code;
+  document.getElementById('s2-desc').textContent = desc;
+  // Reset members
+  chosenMembers = [];
   document.getElementById('member-search').value = '';
   document.getElementById('member-chips').innerHTML = '';
-  document.getElementById('member-dropdown').innerHTML = '';
-  document.getElementById('create-error').style.display = 'none';
-  document.getElementById('btn-save-label').textContent = 'Créer';
-  document.getElementById('btn-save').disabled = false;
-  chosenMembers = [];
+  document.getElementById('create-error-2').style.display = 'none';
   renderMemberDropdown();
-  document.getElementById('modal-create').classList.add('open');
+  document.getElementById('btn-save-label').textContent = 'Créer le groupe';
+  document.getElementById('btn-save').disabled = false;
+  cgGoStep(2);
+}
+
+function cgHandlePhoto(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    cgPhotoB64 = e.target.result.split(',')[1];
+    document.getElementById('cg-photo-img').src = e.target.result;
+    document.getElementById('cg-photo-img').style.display = 'block';
+    document.getElementById('cg-photo-svg').style.display = 'none';
+    document.getElementById('cg-remove-btn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function cgRemovePhoto(){
+  cgPhotoB64 = null;
+  const img = document.getElementById('cg-photo-img');
+  if(img){ img.src=''; img.style.display='none'; }
+  const svg = document.getElementById('cg-photo-svg');
+  if(svg) svg.style.display='';
+  const rb = document.getElementById('cg-remove-btn');
+  if(rb) rb.style.display='none';
+  const fi = document.getElementById('cg-photo-file');
+  if(fi) fi.value='';
 }
 
 async function saveGroup(){
   const code = document.getElementById('cg-code').value.trim().toUpperCase();
   const desc = document.getElementById('cg-desc').value.trim();
-  const err  = document.getElementById('create-error');
-  const errM = document.getElementById('create-error-msg');
+  const err  = document.getElementById('create-error-2');
+  const errM = document.getElementById('create-error-msg-2');
 
-  if(!code){ errM.textContent='Le code du groupe est obligatoire.'; err.style.display='flex'; return; }
-  err.style.display='none';
   document.getElementById('btn-save-label').innerHTML='<span class="spinner"></span>';
   document.getElementById('btn-save').disabled=true;
 
@@ -697,12 +906,15 @@ async function saveGroup(){
   });
 
   if(result&&(result[0]?.id||result.id)){
-    closeModal('modal-create');
-    await loadGroups();
+    // Fill step 3 recap
+    document.getElementById('s3-code').textContent = code;
+    document.getElementById('s3-desc').textContent = desc||'—';
+    document.getElementById('s3-count').textContent = chosenMembers.length + ' membre(s)';
+    cgGoStep(3);
   } else {
     errM.textContent = 'Erreur : '+(result?.message||result?.error||JSON.stringify(result));
     err.style.display='flex';
-    document.getElementById('btn-save-label').textContent='Créer';
+    document.getElementById('btn-save-label').textContent='Créer le groupe';
     document.getElementById('btn-save').disabled=false;
   }
 }
