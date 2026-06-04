@@ -543,7 +543,8 @@ const isReplit  = window.location.hostname.endsWith('.replit.dev') || window.loc
 const FACEPP_DETECT  = isNetlify ? '/.netlify/functions/detect'  : '/api/detect';
 const FACEPP_COMPARE = isNetlify ? '/.netlify/functions/compare' : '/api/compare';
 const CONF_THRESHOLD = 80;
-const SESSION_KEY    = 'lc_session_emp_id';
+const SESSION_KEY     = 'lc_session_emp_id';
+const SESSION_TTL_MS  = 8 * 60 * 60 * 1000; // 8 heures
 
 const fKey = () => window._faceppKey    || '';
 const fSec = () => window._faceppSecret || '';
@@ -620,20 +621,27 @@ function goTo(id, el){
 window.addEventListener('load', async ()=>{
   // Load Face++ keys from Supabase first (shared, device-independent)
   await loadFaceppConfig();
-  const savedId = localStorage.getItem(SESSION_KEY);
-  if(savedId){
-    const emps = await sbGet('employees',`id=eq.${savedId}&status=eq.actif`);
-    if(emps && emps[0]){
-      currentEmp = emps[0];
-      if(currentEmp.company_id){
-        const cos = await sbGet('companies',`id=eq.${currentEmp.company_id}`);
-        currentCompany = cos[0]||null;
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(raw){
+    try {
+      const { id, t } = JSON.parse(raw);
+      if(Date.now() - t > SESSION_TTL_MS){
+        localStorage.removeItem(SESSION_KEY);
+      } else {
+        const emps = await sbGet('employees',`id=eq.${id}&status=eq.actif`);
+        if(emps && emps[0]){
+          currentEmp = emps[0];
+          if(currentEmp.company_id){
+            const cos = await sbGet('companies',`id=eq.${currentEmp.company_id}`);
+            currentCompany = cos[0]||null;
+          }
+          loadMainScreen();
+          showScreen('main');
+          return;
+        }
+        localStorage.removeItem(SESSION_KEY);
       }
-      loadMainScreen();
-      showScreen('main');
-      return;
-    }
-    localStorage.removeItem(SESSION_KEY);
+    } catch(e){ localStorage.removeItem(SESSION_KEY); }
   }
   showScreen('login');
 });
@@ -659,8 +667,8 @@ async function employeeLogin(){
     currentCompany = cos[0]||null;
   }
 
-  // Save session for next time
-  localStorage.setItem(SESSION_KEY, currentEmp.id);
+  // Save session with timestamp for expiry
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ id: currentEmp.id, t: Date.now() }));
 
   if(!currentEmp.face_token){
     // First time → registration
