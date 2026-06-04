@@ -768,6 +768,11 @@ async function confirmReg(){
   });
   const data = await res.json();
 
+  if(data.error_message){
+    label.textContent='Confirmer →';
+    alert('Erreur Face++ : '+data.error_message+'\n\nVérifiez les clés API dans la console admin.');
+    retakeReg(); return;
+  }
   if(!data.faces||!data.faces.length){
     label.textContent='Confirmer →';
     alert('Aucun visage détecté. Reprenez la photo dans un endroit plus lumineux.');
@@ -943,9 +948,13 @@ async function captureAndPointage(){
       body: JSON.stringify({ api_key: k, api_secret: s, image_base64: b64 })
     })).json();
 
+    if(d1.error_message){
+      showResult(false,null,'Erreur Face++ : '+d1.error_message,null);
+      resetBtn(); return;
+    }
     if(!d1.faces||!d1.faces.length){
       showConfBar(0);
-      showResult(false,null,'Aucun visage détecté. Repositionnez-vous.',null);
+      showResult(false,null,'Aucun visage détecté. Repositionnez-vous face à la caméra.',null);
       resetBtn(); return;
     }
 
