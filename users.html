@@ -989,7 +989,11 @@ document.querySelectorAll('.modal-bd').forEach(m=>
 );
 
 // ══ INIT ══
-loadUsers();
+loadUsers().then(() => {
+  if(new URLSearchParams(window.location.search).get('action') === 'add'){
+    setTimeout(openAddModal, 300);
+  }
+});
 </script>
 </body>
 </html>
