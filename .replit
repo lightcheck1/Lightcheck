@@ -2,6 +2,7 @@ modules = ["nodejs-20"]
 [agent]
 expertMode = true
 run = "npm start"
+stack = "BEST_EFFORT_FALLBACK"
 
 [[ports]]
 localPort = 3000
@@ -9,7 +10,7 @@ externalPort = 80
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
+externalPort = 80
 [interpreter]
 command = ["npx", "--yes", "serve", "."]
 
@@ -29,12 +30,12 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
 
 run = "node server.js"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+waitForPort = 5000
