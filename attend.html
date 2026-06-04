@@ -189,6 +189,68 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 /* Nav — absolutely pinned at bottom of screen-main */
 #screen-main .nav-shared{position:absolute;bottom:0;left:0;right:0;z-index:30;}
 
+/* ── PROFILE POPUP ── */
+.profile-popup-backdrop{position:absolute;inset:0;z-index:40;display:none;}
+.profile-popup-backdrop.open{display:block;}
+.profile-popup{
+  position:absolute;top:54px;right:12px;
+  width:260px;
+  background:rgba(22,22,22,0.96);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.7);
+  overflow:hidden;
+  transform:translateY(-8px) scale(0.97);
+  opacity:0;
+  transition:transform 0.2s cubic-bezier(.34,1.56,.64,1), opacity 0.18s ease;
+  pointer-events:none;
+}
+.profile-popup-backdrop.open .profile-popup{
+  transform:translateY(0) scale(1);
+  opacity:1;
+  pointer-events:all;
+}
+.pp-header{padding:16px 16px 12px;}
+.pp-identity{display:flex;align-items:center;gap:12px;}
+.pp-big-avatar{
+  width:46px;height:46px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#f5c542,#c9a030);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;font-weight:700;color:#000;
+}
+.pp-info{flex:1;min-width:0;}
+.pp-name{font-weight:700;font-size:0.95rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pp-company{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pp-badge{
+  display:inline-block;margin-top:7px;
+  background:rgba(245,197,66,0.15);border:1px solid rgba(245,197,66,0.3);
+  color:var(--green);font-family:'IBM Plex Mono',monospace;
+  font-size:0.67rem;font-weight:600;letter-spacing:0.04em;
+  padding:2px 8px;border-radius:20px;
+}
+.pp-badge.pp-badge-ok{background:rgba(39,174,96,0.15);border-color:rgba(39,174,96,0.3);color:#2ecc71;}
+.pp-badge.pp-badge-warn{background:rgba(231,76,60,0.15);border-color:rgba(231,76,60,0.3);color:var(--red);}
+.pp-divider{height:1px;background:rgba(255,255,255,0.07);margin:0 0;}
+.pp-rows{padding:6px 0;}
+.pp-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;cursor:pointer;transition:background 0.12s;
+}
+.pp-row:active{background:rgba(255,255,255,0.06);}
+.pp-row-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.pp-row-label{font-size:0.85rem;color:rgba(255,255,255,0.8);}
+.pp-row-sub{font-size:0.72rem;color:rgba(255,255,255,0.38);font-family:'IBM Plex Mono',monospace;margin-top:1px;}
+.pp-row.danger .pp-row-label{color:var(--red);}
+.pp-row.danger .pp-row-icon{filter:hue-rotate(0deg);}
+.pp-token-row{padding:10px 16px 12px;display:flex;align-items:center;gap:10px;}
+.pp-token-badge{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;padding:5px 10px;
+  font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:rgba(255,255,255,0.6);
+  letter-spacing:0.05em;flex:1;text-align:center;
+}
+
 /* Bottom nav */
 .tc-nav{display:flex;background:var(--dark2);border-top:1px solid var(--dark4);flex-shrink:0;}
 .tc-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -352,7 +414,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
     <div class="tc-top-row">
       <div class="tc-brand">Light <em>Check</em></div>
       <div class="tc-emp-pill">
-        <div class="tc-avatar" id="tc-avatar">?</div>
+        <div class="tc-avatar" id="tc-avatar" onclick="toggleProfilePopup()" style="cursor:pointer;">?</div>
         <div class="tc-emp-name" id="tc-emp-name">—</div>
       </div>
     </div>
@@ -369,6 +431,42 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
         <div class="tc-strip-icon">🕐</div>
         <div class="tc-strip-text"><strong id="tc-clock">--:--:--</strong></div>
         <div class="tc-strip-badge" id="tc-status-badge">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Popup -->
+  <div class="profile-popup-backdrop" id="profile-popup-backdrop" onclick="closeProfilePopup()">
+    <div class="profile-popup" onclick="event.stopPropagation()">
+      <div class="pp-header">
+        <div class="pp-identity">
+          <div class="pp-big-avatar" id="pp-avatar">?</div>
+          <div class="pp-info">
+            <div class="pp-name" id="pp-name">—</div>
+            <div class="pp-company" id="pp-company">—</div>
+            <div id="pp-post-badge" class="pp-badge">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="pp-divider"></div>
+      <div class="pp-token-row">
+        <span style="font-size:0.75rem;color:rgba(255,255,255,0.4);">Code d'accès</span>
+        <div class="pp-token-badge" id="pp-token">—</div>
+      </div>
+      <div class="pp-divider"></div>
+      <div class="pp-rows">
+        <div class="pp-row" onclick="closeProfilePopup(); goTo('settings', document.querySelector('.nav-btn:last-child'))">
+          <div class="pp-row-icon">⚙️</div>
+          <div>
+            <div class="pp-row-label">Mes réglages</div>
+            <div class="pp-row-sub" id="pp-face-status">—</div>
+          </div>
+        </div>
+        <div class="pp-divider"></div>
+        <div class="pp-row danger" onclick="closeProfilePopup(); confirmLogout()">
+          <div class="pp-row-icon">🚪</div>
+          <div class="pp-row-label">Se déconnecter</div>
+        </div>
       </div>
     </div>
   </div>
@@ -790,13 +888,46 @@ function loadMainScreen(){
   const e = currentEmp;
   const initials = e.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
   document.getElementById('tc-avatar').textContent   = initials;
-  document.getElementById('tc-emp-name').textContent = e.full_name.split(' ')[0]; // first name only
+  document.getElementById('tc-emp-name').textContent = e.full_name.split(' ')[0];
   // Debug banner
   document.getElementById('dbg-host').textContent   = window.location.hostname;
   document.getElementById('dbg-env').textContent    = isNetlify ? 'Netlify' : isReplit ? 'Replit' : 'Autre';
   document.getElementById('dbg-detect').textContent = FACEPP_DETECT;
+  // Populate profile popup
+  loadProfilePopup();
   updateStatusBadge();
   startGPS();
+}
+
+// ══ PROFILE POPUP ══
+function loadProfilePopup(){
+  if(!currentEmp) return;
+  const e = currentEmp;
+  const initials = e.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('pp-avatar').textContent  = initials;
+  document.getElementById('pp-name').textContent    = e.full_name;
+  document.getElementById('pp-company').textContent = currentCompany ? currentCompany.name : '—';
+  document.getElementById('pp-token').textContent   = e.login_token || '—';
+  const badge = document.getElementById('pp-post-badge');
+  badge.textContent = e.post || 'Employé(e)';
+  const faceEl = document.getElementById('pp-face-status');
+  if(e.face_token){
+    faceEl.textContent = '✓ Visage enregistré';
+    faceEl.style.color = '#2ecc71';
+  } else {
+    faceEl.textContent = '✗ Visage non enregistré';
+    faceEl.style.color = 'var(--red)';
+  }
+}
+
+function toggleProfilePopup(){
+  const bd = document.getElementById('profile-popup-backdrop');
+  if(bd.classList.contains('open')) closeProfilePopup();
+  else { loadProfilePopup(); bd.classList.add('open'); }
+}
+
+function closeProfilePopup(){
+  document.getElementById('profile-popup-backdrop').classList.remove('open');
 }
 
 // ══ STATUS BADGE ══
