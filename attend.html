@@ -503,15 +503,9 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
       </button>
       <button class="manual-btn" onclick="manualPointage()">Manuel</button>
     </div>
-    <!-- DEBUG BANNER — retire après test -->
-    <div id="debug-banner" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;
-      padding:8px 12px;margin:0 0 6px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
-      color:#f39c12;line-height:1.6;">
-      <div>🔍 <strong>DEBUG</strong></div>
-      <div>Host : <span id="dbg-host">—</span></div>
-      <div>Environnement : <span id="dbg-env">—</span></div>
-      <div>URL Detect : <span id="dbg-detect">—</span></div>
-    </div>
+    <div id="capture-step-msg" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.5);
+      min-height:18px;margin-top:4px;transition:opacity 0.3s;opacity:0;
+      font-family:'IBM Plex Mono',monospace;letter-spacing:0.3px;"></div>
   </div>
 
   <!-- Nav -->
@@ -1037,9 +1031,16 @@ async function startCamera(){
 
 function captureFrame(){
   const v=document.getElementById('video'), c=document.getElementById('canvas');
+  if(!v.videoWidth || !v.videoHeight){
+    throw new Error('Caméra non prête — attendez que l\'image s\'affiche avant de capturer.');
+  }
   c.width=v.videoWidth; c.height=v.videoHeight;
   c.getContext('2d').drawImage(v,0,0);
-  return c.toDataURL('image/jpeg',0.8).split(',')[1];
+  const b64 = c.toDataURL('image/jpeg',0.85).split(',')[1];
+  if(!b64 || b64.length < 100){
+    throw new Error('Image capturée invalide — vérifiez que la caméra est active.');
+  }
+  return b64;
 }
 
 function getGPS(){
@@ -1060,24 +1061,38 @@ function setType(type,el){
 }
 
 // ══ FACE++ POINTAGE ══
+function setStep(icon, label){
+  document.getElementById('btn-capture-label').innerHTML =
+    `<span style="font-size:${icon.length>2?'0.6':'0.9'}rem;line-height:1;">${icon}</span>`;
+  const el = document.getElementById('capture-step-msg');
+  if(el){ el.textContent = label; el.style.opacity='1'; }
+}
+
 async function captureAndPointage(){
   const k=fKey(), s=fSec();
   if(!k||!s){ alert('Clés Face++ non configurées. Allez dans Réglages → Admin.'); return; }
 
   const btn=document.getElementById('btn-capture');
   btn.disabled=true;
-  document.getElementById('btn-capture-label').innerHTML='<span style="font-size:1rem;">⏳</span>';
 
   try{
-    const [b64, gps] = await Promise.all([Promise.resolve(captureFrame()), getGPS()]);
+    setStep('📷','Capture en cours…');
+    let b64;
+    try{ b64 = captureFrame(); }
+    catch(ce){ showResult(false,null,ce.message,null); resetBtn(); return; }
+
+    setStep('⏳','Envoi de l\'image…');
+    const [d1, gps] = await Promise.all([
+      fetch(FACEPP_DETECT, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({api_key:k, api_secret:s, image_base64:b64})
+      }).then(r=>r.json()),
+      getGPS()
+    ]);
     if(gps) currentLoc=gps;
 
-    // Detect via proxy
-    const d1 = await (await fetch(FACEPP_DETECT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: k, api_secret: s, image_base64: b64 })
-    })).json();
+    setStep('🔍','Détection du visage…');
 
     if(d1.error_message){
       showResult(false,null,'Erreur Face++ : '+d1.error_message,null);
@@ -1085,21 +1100,23 @@ async function captureAndPointage(){
     }
     if(!d1.faces||!d1.faces.length){
       showConfBar(0);
-      showResult(false,null,'Aucun visage détecté. Repositionnez-vous face à la caméra.',null);
+      showResult(false,null,'Aucun visage détecté — repositionnez-vous face à la caméra.',null);
       resetBtn(); return;
     }
 
-    // Compare via proxy
-    const d2 = await (await fetch(FACEPP_COMPARE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: k, api_secret: s, face_token1: d1.faces[0].face_token, face_token2: currentEmp.face_token })
-    })).json();
+    setStep('🔄','Comparaison biométrique…');
+    const d2 = await fetch(FACEPP_COMPARE, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({api_key:k, api_secret:s, face_token1:d1.faces[0].face_token, face_token2:currentEmp.face_token})
+    }).then(r=>r.json());
 
     if(d2.error_message){ showResult(false,null,'Erreur Face++ : '+d2.error_message,null); resetBtn(); return; }
 
     const conf=parseFloat(d2.confidence||0);
     showConfBar(conf);
+
+    setStep('✓','Vérification terminée');
 
     if(conf >= fThresh()){
       await recordPointage('Face++',conf);
@@ -1115,6 +1132,8 @@ async function captureAndPointage(){
 function resetBtn(){
   document.getElementById('btn-capture').disabled=false;
   document.getElementById('btn-capture-label').textContent='📷';
+  const el=document.getElementById('capture-step-msg');
+  if(el){ el.style.opacity='0'; setTimeout(()=>{ el.textContent=''; },300); }
 }
 
 function showConfBar(score){

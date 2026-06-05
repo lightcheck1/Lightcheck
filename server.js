@@ -19,11 +19,15 @@ app.get('/groups',    (req, res) => res.sendFile(path.join(__dirname, 'groups.ht
 app.get('/schedules', (req, res) => res.sendFile(path.join(__dirname, 'schedules.html')));
 app.get('/',         (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-function faceppRequest(path, params) {
+const FACEPP_HOSTS = ['api-us.faceplusplus.com', 'api-cn.faceplusplus.com'];
+// Cache the working host per api_key to avoid retrying every time
+const hostCache = {};
+
+function faceppRequestHost(hostname, path, params) {
   return new Promise((resolve, reject) => {
     const postData = querystring.stringify(params);
     const options = {
-      hostname: 'api-us.faceplusplus.com',
+      hostname,
       path,
       method: 'POST',
       headers: {
@@ -43,6 +47,32 @@ function faceppRequest(path, params) {
     req.write(postData);
     req.end();
   });
+}
+
+async function faceppRequest(path, params) {
+  const cacheKey = params.api_key || 'default';
+
+  // Use cached host if available
+  if (hostCache[cacheKey]) {
+    return faceppRequestHost(hostCache[cacheKey], path, params);
+  }
+
+  // Try US first, then CN — auto-detect the right region for these keys
+  for (const host of FACEPP_HOSTS) {
+    const result = await faceppRequestHost(host, path, params);
+    if (result.error_message && result.error_message.includes('AUTHENTICATION_ERROR')) {
+      console.log(`[Face++] ${host} → AUTHENTICATION_ERROR, trying next host…`);
+      continue;
+    }
+    // This host works — cache it
+    hostCache[cacheKey] = host;
+    console.log(`[Face++] Using host: ${host}`);
+    return result;
+  }
+
+  // Both failed — return the last error
+  hostCache[cacheKey] = FACEPP_HOSTS[0];
+  return faceppRequestHost(FACEPP_HOSTS[0], path, params);
 }
 
 app.post('/api/detect', async (req, res) => {
