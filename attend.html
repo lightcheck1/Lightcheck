@@ -883,10 +883,6 @@ function loadMainScreen(){
   const initials = e.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
   document.getElementById('tc-avatar').textContent   = initials;
   document.getElementById('tc-emp-name').textContent = e.full_name.split(' ')[0];
-  // Debug banner
-  document.getElementById('dbg-host').textContent   = window.location.hostname;
-  document.getElementById('dbg-env').textContent    = isNetlify ? 'Netlify' : isReplit ? 'Replit' : 'Autre';
-  document.getElementById('dbg-detect').textContent = FACEPP_DETECT;
   // Populate profile popup
   loadProfilePopup();
   updateStatusBadge();
