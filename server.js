@@ -16,8 +16,10 @@ app.get('/index',    (req, res) => res.sendFile(path.join(__dirname, 'index.html
 app.get('/rapports', (req, res) => res.sendFile(path.join(__dirname, 'rapports.html')));
 app.get('/users',    (req, res) => res.sendFile(path.join(__dirname, 'users.html')));
 app.get('/groups',    (req, res) => res.sendFile(path.join(__dirname, 'groups.html')));
-app.get('/schedules', (req, res) => res.sendFile(path.join(__dirname, 'schedules.html')));
-app.get('/',         (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/schedules',    (req, res) => res.sendFile(path.join(__dirname, 'schedules.html')));
+app.get('/appointments',(req, res) => res.sendFile(path.join(__dirname, 'appointments.html')));
+app.get('/settings',    (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
+app.get('/',            (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const FACEPP_HOSTS = ['api-us.faceplusplus.com', 'api-cn.faceplusplus.com'];
 // Cache the working host per api_key to avoid retrying every time
