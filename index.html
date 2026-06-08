@@ -227,6 +227,20 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
 .cal-leg-item{display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--text2);}
 .cal-leg-dot{width:8px;height:8px;border-radius:50%;}
 
+/* ── APPOINTMENTS TODAY CARD ── */
+.appt-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;
+  border-bottom:1px solid var(--border);}
+.appt-item:last-child{border-bottom:none;}
+.appt-time-col{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--text3);
+  white-space:nowrap;padding-top:2px;min-width:44px;}
+.appt-info{flex:1;min-width:0;}
+.appt-name{font-size:0.855rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appt-sub{font-size:0.75rem;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appt-status{flex-shrink:0;}
+.appt-count{display:flex;align-items:baseline;gap:6px;margin-bottom:10px;}
+.appt-count-val{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;line-height:1;color:var(--blue-dark);}
+.appt-count-label{font-size:0.78rem;color:var(--text2);}
+
 /* ── QUICK LINKS ── */
 .quick-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .quick-link{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
@@ -610,6 +624,17 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
     </div>
   </div>
 
+  <!-- APPOINTMENTS TODAY -->
+  <div class="card" id="appt-card">
+    <div class="card-header">
+      <div class="card-title">Rendez-vous du jour</div>
+      <button class="card-action" onclick="window.location.href='appointments.html'">Voir tout →</button>
+    </div>
+    <div id="appt-today-list">
+      <div class="loading"><div class="spinner"></div> Chargement…</div>
+    </div>
+  </div>
+
   <!-- LIVE ACTIVITY -->
   <div class="card">
     <div class="card-header">
@@ -759,10 +784,65 @@ setTimeout(()=>{
 
 // ══ LOAD ALL ══
 async function loadAll(){
-  await Promise.all([loadEmployees(), loadPointages(), loadDevices(), loadNotifications()]);
+  await Promise.all([loadEmployees(), loadPointages(), loadDevices(), loadNotifications(), loadAppointmentsToday()]);
   updateStats();
   loadActivity();
   renderCalendar();
+}
+
+// ══ APPOINTMENTS TODAY ══
+async function loadAppointmentsToday(){
+  const el = document.getElementById('appt-today-list');
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+  try{
+    const rows = await sbGet('appointments',
+      `appointment_date=gte.${today}T00:00:00&appointment_date=lte.${today}T23:59:59&order=appointment_date.asc`);
+
+    if(!Array.isArray(rows) || rows.length === 0){
+      el.innerHTML = `
+        <div class="appt-count"><span class="appt-count-val">0</span><span class="appt-count-label">rendez-vous aujourd'hui</span></div>
+        <div style="font-size:0.82rem;color:var(--text3);padding:4px 0;">Aucun rendez-vous prévu aujourd'hui.</div>
+        <div style="margin-top:10px;">
+          <button class="card-action" onclick="window.location.href='appointments.html'">+ Nouveau rendez-vous</button>
+        </div>`;
+      return;
+    }
+
+    const statusBadge = s => {
+      const map = {planifié:'#eff8ff:#2e90fa',confirmé:'#ecfdf3:#027a48',annulé:'#fef3f2:#f04438',terminé:'#f2f4f7:#667085'};
+      const [bg,col] = (map[s]||map['planifié']).split(':');
+      return `<span style="display:inline-flex;align-items:center;padding:1px 7px;border-radius:20px;font-size:0.68rem;font-weight:500;background:${bg};color:${col};">${s}</span>`;
+    };
+
+    const items = rows.slice(0,4).map(a => {
+      const t = a.appointment_date
+        ? new Date(a.appointment_date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+        : '—';
+      return `<div class="appt-item">
+        <div class="appt-time-col">${t}</div>
+        <div class="appt-info">
+          <div class="appt-name">${a.visitor_name||'Visiteur'}</div>
+          <div class="appt-sub">${a.project||''}</div>
+        </div>
+        <div class="appt-status">${statusBadge(a.status||'planifié')}</div>
+      </div>`;
+    }).join('');
+
+    const more = rows.length > 4
+      ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:8px;">+ ${rows.length - 4} autre(s) rendez-vous</div>`
+      : '';
+
+    el.innerHTML = `
+      <div class="appt-count">
+        <span class="appt-count-val">${rows.length}</span>
+        <span class="appt-count-label">rendez-vous aujourd'hui</span>
+      </div>
+      ${items}${more}`;
+  }catch(e){
+    el.innerHTML = `<div style="font-size:0.82rem;color:var(--text3);padding:4px 0;">Impossible de charger les rendez-vous.</div>`;
+  }
 }
 
 // ══ EMPLOYEES ══

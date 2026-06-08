@@ -107,5 +107,92 @@ app.post('/api/compare', async (req, res) => {
   }
 });
 
+// ── DB INIT — crée la table appointments dans Supabase ──
+// Nécessite la variable d'env SUPABASE_SERVICE_KEY (clé service_role Supabase)
+app.post('/api/init-appointments', async (req, res) => {
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+  const SUPABASE_URL = 'https://cokuyebjlkuolwpwizko.supabase.co';
+
+  if(!serviceKey){
+    return res.status(400).json({
+      ok: false,
+      error: 'SUPABASE_SERVICE_KEY non configurée.',
+      hint: 'Ajoutez la clé service_role Supabase dans les secrets Replit sous le nom SUPABASE_SERVICE_KEY.'
+    });
+  }
+
+  const sql = `
+CREATE TABLE IF NOT EXISTS appointments (
+  id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  visitor_name     text NOT NULL,
+  visitor_email    text,
+  visitor_phone    text,
+  project          text NOT NULL,
+  notes            text,
+  status           text NOT NULL DEFAULT 'planifié'
+                     CHECK (status IN ('planifié','confirmé','annulé','terminé')),
+  employee_id      uuid REFERENCES employees(id) ON DELETE SET NULL,
+  appointment_date timestamptz NOT NULL,
+  appointment_end  timestamptz,
+  created_at       timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS appointments_date_idx     ON appointments (appointment_date);
+CREATE INDEX IF NOT EXISTS appointments_status_idx   ON appointments (status);
+CREATE INDEX IF NOT EXISTS appointments_employee_idx ON appointments (employee_id);
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='appointments' AND policyname='anon_read') THEN
+    CREATE POLICY anon_read  ON appointments FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='appointments' AND policyname='anon_write') THEN
+    CREATE POLICY anon_write ON appointments FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END $$;`;
+
+  try{
+    const fetch = (await import('node-fetch')).default;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': 'Bearer ' + serviceKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: sql })
+    });
+
+    // Fallback: try the pg connection string approach
+    if(!r.ok){
+      // Try direct pg query via Supabase's SQL endpoint
+      const r2 = await fetch(`${SUPABASE_URL}/pg/query`, {
+        method: 'POST',
+        headers: {
+          'apikey': serviceKey,
+          'Authorization': 'Bearer ' + serviceKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: sql })
+      });
+      if(!r2.ok){
+        return res.json({ ok: false, error: 'Requête rejetée. Exécutez manuellement le fichier migrations/appointments.sql dans l\'éditeur SQL Supabase.', sql });
+      }
+    }
+
+    res.json({ ok: true, message: 'Table appointments créée avec succès.' });
+  }catch(e){
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// ── MIGRATION STATUS ──
+app.get('/api/init-appointments', (req, res) => {
+  res.json({
+    endpoint: 'POST /api/init-appointments',
+    requires: 'SUPABASE_SERVICE_KEY secret',
+    configured: !!process.env.SUPABASE_SERVICE_KEY,
+    sqlFile: 'migrations/appointments.sql'
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✓ Light Check running on port ${PORT}`));
