@@ -21,6 +21,33 @@ app.get('/appointments',(req, res) => res.sendFile(path.join(__dirname, 'appoint
 app.get('/settings',    (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
 app.get('/',            (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
+// ── Generic HTTPS POST helper (uses built-in https module) ──
+function httpsPost(hostname, urlPath, body, extraHeaders={}) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const options = {
+      hostname, path: urlPath, method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+        ...extraHeaders
+      }
+    };
+    const req = https.request(options, r => {
+      let raw = '';
+      r.on('data', c => raw += c);
+      r.on('end', () => {
+        let parsed;
+        try { parsed = JSON.parse(raw); } catch { parsed = raw; }
+        resolve({ statusCode: r.statusCode, body: parsed });
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
 const FACEPP_HOSTS = ['api-us.faceplusplus.com', 'api-cn.faceplusplus.com'];
 // Cache the working host per api_key to avoid retrying every time
 const hostCache = {};
@@ -107,17 +134,15 @@ app.post('/api/compare', async (req, res) => {
   }
 });
 
-// ── DB INIT — crée la table appointments dans Supabase ──
-// Nécessite la variable d'env SUPABASE_SERVICE_KEY (clé service_role Supabase)
+// ── DB INIT — crée la table appointments dans Supabase via pg ──
 app.post('/api/init-appointments', async (req, res) => {
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-  const SUPABASE_URL = 'https://cokuyebjlkuolwpwizko.supabase.co';
+  const SUPABASE_PROJECT = 'cokuyebjlkuolwpwizko';
 
   if(!serviceKey){
     return res.status(400).json({
       ok: false,
-      error: 'SUPABASE_SERVICE_KEY non configurée.',
-      hint: 'Ajoutez la clé service_role Supabase dans les secrets Replit sous le nom SUPABASE_SERVICE_KEY.'
+      error: 'SUPABASE_SERVICE_KEY non configurée.'
     });
   }
 
@@ -150,34 +175,19 @@ DO $$ BEGIN
 END $$;`;
 
   try{
-    const fetch = (await import('node-fetch')).default;
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
-      method: 'POST',
-      headers: {
-        'apikey': serviceKey,
-        'Authorization': 'Bearer ' + serviceKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query: sql })
+    const { Client } = require('pg');
+    // Supabase direct Postgres connection (port 5432, SSL required)
+    const client = new Client({
+      host: `aws-0-eu-west-3.pooler.supabase.com`,
+      port: 6543,
+      database: 'postgres',
+      user: `postgres.${SUPABASE_PROJECT}`,
+      password: serviceKey,
+      ssl: { rejectUnauthorized: false }
     });
-
-    // Fallback: try the pg connection string approach
-    if(!r.ok){
-      // Try direct pg query via Supabase's SQL endpoint
-      const r2 = await fetch(`${SUPABASE_URL}/pg/query`, {
-        method: 'POST',
-        headers: {
-          'apikey': serviceKey,
-          'Authorization': 'Bearer ' + serviceKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ query: sql })
-      });
-      if(!r2.ok){
-        return res.json({ ok: false, error: 'Requête rejetée. Exécutez manuellement le fichier migrations/appointments.sql dans l\'éditeur SQL Supabase.', sql });
-      }
-    }
-
+    await client.connect();
+    await client.query(sql);
+    await client.end();
     res.json({ ok: true, message: 'Table appointments créée avec succès.' });
   }catch(e){
     res.status(500).json({ ok: false, error: e.message });

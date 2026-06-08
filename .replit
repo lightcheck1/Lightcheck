@@ -39,3 +39,6 @@ run = "node server.js"
 task = "shell.exec"
 args = "npm start"
 waitForPort = 5000
+
+[nix]
+channel = "stable-25_05"
