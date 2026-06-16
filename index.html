@@ -847,7 +847,8 @@ async function loadAppointmentsToday(){
 
 // ══ EMPLOYEES ══
 async function loadEmployees(){
-  allEmployees = await sbGet('employees','status=eq.actif&order=full_name.asc');
+  const empRes = await sbGet('employees','status=eq.actif&order=full_name.asc');
+  allEmployees = Array.isArray(empRes) ? empRes : [];
   // Populate company filter
   const companies = await sbGet('companies','');
   const sel = document.getElementById('company-filter');
@@ -870,11 +871,14 @@ function todayGMT1(){ return new Date(Date.now()+3600000).toISOString().split('T
 // ══ POINTAGES ══
 async function loadPointages(){
   const today = todayGMT1();
-  allPointages = await sbGet('pointages',`created_at=gte.${today}T00:00:00+01:00&order=created_at.desc&limit=200`);
+  const res = await sbGet('pointages',`created_at=gte.${today}T00:00:00+01:00&order=created_at.desc&limit=200`);
+  allPointages = Array.isArray(res) ? res : [];
 }
 
 // ══ STATS + DONUT ══
 function updateStats(){
+  if(!Array.isArray(allPointages)) allPointages = [];
+  if(!Array.isArray(allEmployees)) allEmployees = [];
   const empMap = {};
   allEmployees.forEach(e=>empMap[e.id]=e);
 
@@ -951,7 +955,7 @@ function renderActivity(){
   const empMap = {};
   allEmployees.forEach(e=>empMap[e.id]=e);
 
-  let filtered = allPointages;
+  let filtered = Array.isArray(allPointages) ? allPointages : [];
   if(currentActTab !== 'all') filtered = allPointages.filter(p=>p.type===currentActTab);
   filtered = filtered.slice(0,30);
 
