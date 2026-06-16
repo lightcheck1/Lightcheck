@@ -864,10 +864,13 @@ async function loadEmployees(){
   }
 }
 
+// ══ GMT+1 DATE HELPER ══
+function todayGMT1(){ return new Date(Date.now()+3600000).toISOString().split('T')[0]; }
+
 // ══ POINTAGES ══
 async function loadPointages(){
-  const today = new Date().toISOString().split('T')[0];
-  allPointages = await sbGet('pointages',`created_at=gte.${today}T00:00:00&order=created_at.desc&limit=200`);
+  const today = todayGMT1();
+  allPointages = await sbGet('pointages',`created_at=gte.${today}T00:00:00+01:00&order=created_at.desc&limit=200`);
 }
 
 // ══ STATS + DONUT ══
@@ -1061,14 +1064,21 @@ function changeMonth(dir){
 }
 
 // ══ NOTIFICATIONS ══
+const notifMessages = {
+  'entrée':       e=>`${e} vient d'arriver`,
+  'sortie':       e=>`${e} est parti(e)`,
+  'pause':        e=>`${e} est en pause`,
+  'retour':       e=>`${e} est de retour`,
+  'déconnexion':  e=>`${e} s'est déconnecté(e)`,
+};
+
 async function loadNotifications(){
-  const cutoff = new Date(Date.now() - 7*24*3600*1000).toISOString();
-  const [pts, emps] = await Promise.all([
-    sbGet('pointages',`type=eq.déconnexion&created_at=gte.${cutoff}&order=created_at.desc&limit=30`),
-    sbGet('employees','')
-  ]);
+  const today = todayGMT1();
   const empMap={};
-  (emps||[]).forEach(e=>empMap[e.id]=e);
+  (allEmployees||[]).forEach(e=>empMap[e.id]=e);
+  // Show all pointage types from today + past 7 days
+  const cutoff = new Date(Date.now() - 7*24*3600*1000).toISOString();
+  const pts = await sbGet('pointages',`created_at=gte.${cutoff}&order=created_at.desc&limit=50`);
   notifData = (pts||[]).map(p=>({...p, emp:empMap[p.employee_id]||{full_name:'Employé inconnu'}}));
   renderNotifications();
 }
@@ -1084,19 +1094,21 @@ function renderNotifications(){
   }
 
   const unread = notifData.filter(n=>new Date(n.created_at).getTime()>notifLastSeen).length;
-  if(unread>0){ badge.classList.remove('hidden'); }
-  else { badge.classList.add('hidden'); }
+  badge.classList.toggle('hidden', unread === 0);
 
   el.innerHTML = notifData.map(n=>{
     const isUnread = new Date(n.created_at).getTime() > notifLastSeen;
     const t = new Date(n.created_at);
-    const timeStr = t.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) +
-      ' à ' + t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const timeStr = t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) +
+      ' · ' + t.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+    const msgFn = notifMessages[n.type] || (e=>`${e} — ${n.type}`);
+    const typeColors = {'entrée':'var(--green)','sortie':'var(--red)','pause':'var(--amber)','retour':'var(--blue)','déconnexion':'var(--text3)'};
+    const dotColor = typeColors[n.type]||'var(--text3)';
     return `<div class="notif-item ${isUnread?'unread':''}">
-      <div class="notif-dot ${isUnread?'':'read'}"></div>
+      <div class="notif-dot ${isUnread?'':'read'}" style="${isUnread?'background:'+dotColor+';':''}"></div>
       <div class="notif-body">
-        <div class="notif-name">${n.emp.full_name}</div>
-        <div class="notif-msg">S'est déconnecté(e) de l'application de pointage</div>
+        <div class="notif-name">${n.emp.full_name||'—'}</div>
+        <div class="notif-msg">${msgFn(n.emp.full_name||'')}</div>
         <div class="notif-time">${timeStr}</div>
       </div>
     </div>`;
@@ -1114,6 +1126,63 @@ function markNotifsRead(){
   renderNotifications();
   document.getElementById('notif-drawer').classList.remove('open');
 }
+
+// ══ LIVE TOAST ══
+let _toastTimer;
+function showToast(msg){
+  let t = document.getElementById('lc-toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'lc-toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#101828;color:#fff;padding:10px 20px;border-radius:8px;font-size:0.875rem;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{ t.style.opacity='0'; }, 3500);
+}
+
+// ══ REAL-TIME POLLING ══
+let _lastPointageTime = 0;
+
+async function pollLive(){
+  const prevCount = allPointages ? allPointages.length : 0;
+  const prevNewest = allPointages && allPointages[0] ? new Date(allPointages[0].created_at).getTime() : 0;
+
+  await loadPointages();
+  updateStats();
+  renderActivity();
+
+  // Check for new pointages since last poll
+  if(allPointages && allPointages[0]){
+    const newest = new Date(allPointages[0].created_at).getTime();
+    if(_lastPointageTime > 0 && newest > _lastPointageTime){
+      // New pointage(s) arrived — update notifications and show toast
+      const empMap={};
+      (allEmployees||[]).forEach(e=>empMap[e.id]=e);
+      const newOnes = allPointages.filter(p=>new Date(p.created_at).getTime()>_lastPointageTime);
+      newOnes.forEach(p=>{
+        const emp = empMap[p.employee_id];
+        const name = emp ? (emp.full_name||emp.name||'Employé') : 'Employé';
+        const msgFn = notifMessages[p.type]||(n=>`${n} — ${p.type}`);
+        showToast('🔔 ' + msgFn(name));
+        notifData.unshift({...p, emp: emp||{full_name:name}});
+      });
+      renderNotifications();
+    }
+    _lastPointageTime = newest;
+  }
+}
+
+// Start polling every 8 seconds after initial load
+window.addEventListener('load', ()=>{
+  setTimeout(async ()=>{
+    await loadAll();
+    if(allPointages && allPointages[0]) _lastPointageTime = new Date(allPointages[0].created_at).getTime();
+    setInterval(pollLive, 8000);
+  }, 0);
+});
 
 // Close notif drawer on outside click
 document.addEventListener('click', e=>{
@@ -1158,12 +1227,6 @@ function populateProfilePopup(){
   document.getElementById('pp-company-name').textContent = co ? co.name : 'Light Check';
 }
 
-// ══ AUTO REFRESH every 30s ══
-loadAll();
-setInterval(()=>{
-  loadPointages().then(()=>{ updateStats(); renderActivity(); });
-  loadNotifications();
-}, 30000);
 </script>
 </body>
 </html>

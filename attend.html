@@ -920,11 +920,14 @@ function closeProfilePopup(){
   document.getElementById('profile-popup-backdrop').classList.remove('open');
 }
 
+// ══ GMT+1 DATE HELPER ══
+function todayGMT1(){ return new Date(Date.now()+3600000).toISOString().split('T')[0]; }
+
 // ══ STATUS BADGE ══
 async function updateStatusBadge(){
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayGMT1();
   const data = await sbGet('pointages',
-    `employee_id=eq.${currentEmp.id}&created_at=gte.${today}T00:00:00&order=created_at.desc&limit=1`);
+    `employee_id=eq.${currentEmp.id}&created_at=gte.${today}T00:00:00+01:00&order=created_at.desc&limit=1`);
   const badge = document.getElementById('tc-status-badge');
 
   if(!data||!data.length){
@@ -1189,8 +1192,8 @@ function closeResult(){ document.getElementById('result-overlay').classList.remo
 // ══ HISTORY ══
 async function renderHistory(){
   if(!currentEmp) return;
-  const today=new Date().toISOString().split('T')[0];
-  const data=await sbGet('pointages',`employee_id=eq.${currentEmp.id}&created_at=gte.${today}T00:00:00&order=created_at.desc`);
+  const today=todayGMT1();
+  const data=await sbGet('pointages',`employee_id=eq.${currentEmp.id}&created_at=gte.${today}T00:00:00+01:00&order=created_at.desc`);
   const el=document.getElementById('hist-scroll');
   if(!data||!data.length){
     el.innerHTML='<div class="hist-empty"><div class="hist-empty-icon">📋</div><div>Aucun pointage aujourd\'hui</div></div>';
