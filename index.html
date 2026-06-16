@@ -594,7 +594,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
           stroke-dasharray="0 251" stroke-dashoffset="63" stroke-linecap="round"
           style="transition:stroke-dasharray 0.6s ease;transition-delay:0.2s;" id="donut-pause"/>
         <text x="55" y="51" text-anchor="middle" font-family="Fraunces,serif" font-size="18" font-weight="700" fill="#101828" id="donut-center-val">—</text>
-        <text x="55" y="64" text-anchor="middle" font-family="Instrument Sans,sans-serif" font-size="9" fill="#667085">présents</text>
+        <text x="55" y="64" text-anchor="middle" font-family="Instrument Sans,sans-serif" font-size="9" fill="#667085" id="donut-center-label">présents</text>
       </svg>
       <div class="donut-legend">
         <div class="legend-item">
@@ -899,9 +899,16 @@ function updateStats(){
   document.getElementById('leg-out').textContent      = outCount;
   document.getElementById('leg-pause').textContent    = pauseCount;
   document.getElementById('leg-absent').textContent   = absentCount;
-  const maxCount = Math.max(inCount, outCount, pauseCount, absentCount);
-  const dominantPct = allEmployees.length > 0 ? Math.round(maxCount / allEmployees.length * 100) : 0;
+  const categories = [
+    { count: inCount,    label: 'entrée' },
+    { count: outCount,   label: 'sortie' },
+    { count: pauseCount, label: 'pause' },
+    { count: absentCount,label: 'absents' }
+  ];
+  const dominant = categories.reduce((a, b) => b.count > a.count ? b : a, categories[0]);
+  const dominantPct = allEmployees.length > 0 ? Math.round(dominant.count / allEmployees.length * 100) : 0;
   document.getElementById('donut-center-val').textContent = dominantPct + '%';
+  document.getElementById('donut-center-label').textContent = dominant.label;
 
   // Draw donut
   const circ = 2 * Math.PI * 40; // 251.3
