@@ -19,6 +19,7 @@ app.get('/groups',    (req, res) => res.sendFile(path.join(__dirname, 'groups.ht
 app.get('/schedules',    (req, res) => res.sendFile(path.join(__dirname, 'schedules.html')));
 app.get('/appointments',(req, res) => res.sendFile(path.join(__dirname, 'appointments.html')));
 app.get('/settings',    (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
+app.get('/conges',      (req, res) => res.sendFile(path.join(__dirname, 'conges.html')));
 app.get('/',            (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ── Generic HTTPS POST helper (uses built-in https module) ──
