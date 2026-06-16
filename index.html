@@ -1180,7 +1180,7 @@ window.addEventListener('load', ()=>{
   setTimeout(async ()=>{
     await loadAll();
     if(allPointages && allPointages[0]) _lastPointageTime = new Date(allPointages[0].created_at).getTime();
-    setInterval(pollLive, 8000);
+    setInterval(pollLive, 2000);
   }, 0);
 });
 
