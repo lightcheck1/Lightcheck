@@ -560,7 +560,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
   <div class="stat-chips">
     <div class="stat-chip">
       <div class="chip-val green" id="stat-present">—</div>
-      <div class="chip-label">Dans</div>
+      <div class="chip-label">Entrée</div>
     </div>
     <div class="stat-chip">
       <div class="chip-val red" id="stat-absent">—</div>
@@ -594,12 +594,12 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'In
           stroke-dasharray="0 251" stroke-dashoffset="63" stroke-linecap="round"
           style="transition:stroke-dasharray 0.6s ease;transition-delay:0.2s;" id="donut-pause"/>
         <text x="55" y="51" text-anchor="middle" font-family="Fraunces,serif" font-size="18" font-weight="700" fill="#101828" id="donut-center-val">—</text>
-        <text x="55" y="64" text-anchor="middle" font-family="Instrument Sans,sans-serif" font-size="9" fill="#667085">total</text>
+        <text x="55" y="64" text-anchor="middle" font-family="Instrument Sans,sans-serif" font-size="9" fill="#667085">présents</text>
       </svg>
       <div class="donut-legend">
         <div class="legend-item">
           <div class="legend-dot" style="background:var(--green);"></div>
-          <span class="legend-label">Dans</span>
+          <span class="legend-label">Entrée</span>
           <span class="legend-val" id="leg-in">0</span>
         </div>
         <div class="legend-item">
@@ -899,7 +899,8 @@ function updateStats(){
   document.getElementById('leg-out').textContent      = outCount;
   document.getElementById('leg-pause').textContent    = pauseCount;
   document.getElementById('leg-absent').textContent   = absentCount;
-  document.getElementById('donut-center-val').textContent = allEmployees.length;
+  const presentPct = allEmployees.length > 0 ? Math.round(inCount / allEmployees.length * 100) : 0;
+  document.getElementById('donut-center-val').textContent = presentPct + '%';
 
   // Draw donut
   const circ = 2 * Math.PI * 40; // 251.3
@@ -915,15 +916,21 @@ function updateStats(){
   const outOffset   = inOffset    - inDash;
   const pauseOffset = outOffset   - outDash;
 
-  const setArc = (id, dash, offset) => {
+  const setArc = (id, dash, offset, count) => {
     const el = document.getElementById(id);
-    el.setAttribute('stroke-dasharray', `${dash} ${circ - dash}`);
-    el.setAttribute('stroke-dashoffset', -offset);
+    if (count === 0) {
+      el.setAttribute('stroke-dasharray', `0 ${circ}`);
+      el.setAttribute('stroke', 'none');
+    } else {
+      el.setAttribute('stroke', el.id === 'donut-in' ? '#12b76a' : el.id === 'donut-out' ? '#f04438' : '#f79009');
+      el.setAttribute('stroke-dasharray', `${dash} ${circ - dash}`);
+      el.setAttribute('stroke-dashoffset', -offset);
+    }
   };
 
-  setArc('donut-in',    inDash,    inOffset);
-  setArc('donut-out',   outDash,   outOffset);
-  setArc('donut-pause', pauseDash, pauseOffset);
+  setArc('donut-in',    inDash,    inOffset,    inCount);
+  setArc('donut-out',   outDash,   outOffset,   outCount);
+  setArc('donut-pause', pauseDash, pauseOffset, pauseCount);
 }
 
 // ══ ACTIVITY ══
