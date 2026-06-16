@@ -899,8 +899,9 @@ function updateStats(){
   document.getElementById('leg-out').textContent      = outCount;
   document.getElementById('leg-pause').textContent    = pauseCount;
   document.getElementById('leg-absent').textContent   = absentCount;
-  const presentPct = allEmployees.length > 0 ? Math.round(inCount / allEmployees.length * 100) : 0;
-  document.getElementById('donut-center-val').textContent = presentPct + '%';
+  const maxCount = Math.max(inCount, outCount, pauseCount, absentCount);
+  const dominantPct = allEmployees.length > 0 ? Math.round(maxCount / allEmployees.length * 100) : 0;
+  document.getElementById('donut-center-val').textContent = dominantPct + '%';
 
   // Draw donut
   const circ = 2 * Math.PI * 40; // 251.3
