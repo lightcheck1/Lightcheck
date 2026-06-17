@@ -63,20 +63,23 @@ body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-s
 .card-title{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:12px;}
 
 /* STATS */
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;}
 .stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .stat.g::after{background:var(--accent);}
 .stat.b::after{background:var(--blue);}
 .stat.o::after{background:var(--orange);}
 .stat.y::after{background:var(--yellow);}
+.stat.r::after{background:var(--accent);}
+.stat.p::after{background:var(--purple);}
 .stat-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);}
 .stat-val{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;line-height:1.1;margin:4px 0 2px;}
 .stat-val.g{color:var(--accent);}
 .stat-val.b{color:var(--blue);}
 .stat-val.o{color:var(--orange);}
 .stat-val.y{color:var(--yellow);}
-.stat-desc{font-size:0.75rem;color:var(--text2);}
+.stat-val.r{color:var(--accent);}
+.stat-desc{font-size:0.75rem;color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
 /* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
@@ -207,7 +210,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 html, body { overflow-x: hidden; max-width: 100vw; }
 
 @media (max-width: 900px) {
-  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .stat-row{grid-template-columns:repeat(3,1fr);}
 }
 
 @media (max-width: 768px) {
@@ -327,6 +330,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
   <nav class="sidebar-nav">
     <div class="nav-section">Vue d'ensemble</div>
     <button class="nav-item active" onclick="showPage('dashboard',this);closeSidebar()"><span class="icon">▦</span> Tableau de bord</button>
+    <button class="nav-item" onclick="showPage('board-rh',this);closeSidebar()"><span class="icon">📋</span> Tableau RH</button>
     <button class="nav-item" onclick="showPage('live',this);closeSidebar()"><span class="icon">◉</span> Flux en direct</button>
     <div class="nav-section">Personnes</div>
     <button class="nav-item" onclick="showPage('employees',this);closeSidebar()"><span class="icon">◈</span> Employés</button>
@@ -388,6 +392,8 @@ html, body { overflow-x: hidden; max-width: 100vw; }
         <div class="stat o"><div class="stat-label">Absents</div><div class="stat-val o" id="s-absent">—</div><div class="stat-desc">Pas encore pointés</div></div>
         <div class="stat b"><div class="stat-label">Pointages</div><div class="stat-val b" id="s-total">—</div><div class="stat-desc">Total du jour</div></div>
         <div class="stat y"><div class="stat-label">Confiance moy.</div><div class="stat-val y" id="s-conf">—</div><div class="stat-desc">Score Face++ moyen</div></div>
+        <div class="stat r"><div class="stat-label">Retards</div><div class="stat-val r" id="s-retards">—</div><div class="stat-desc">Retards aujourd'hui</div></div>
+        <div class="stat p"><div class="stat-label">Heures Sup. cumulées</div><div class="stat-val p" id="s-overtime" style="color:var(--purple);">—</div><div class="stat-desc">Heures supp. aujourd'hui</div></div>
       </div>
       <div class="card">
         <div class="flex justify-between items-center mb-12">
@@ -398,6 +404,71 @@ html, body { overflow-x: hidden; max-width: 100vw; }
           <thead><tr><th>Employé</th><th>Type</th><th>Heure</th><th>Confiance</th><th>GPS</th><th>Statut</th></tr></thead>
           <tbody id="dash-log"></tbody>
         </table></div>
+      </div>
+    </div>
+
+    <!-- ══ TABLEAU RH COMPLET (NCHECK) ══ -->
+    <div class="page" id="page-board-rh">
+      <div class="ph flex justify-between items-center" style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <div>
+          <div class="ph-title">Tableau RH Équipe</div>
+          <div class="ph-sub" id="board-rh-date">—</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a class="btn btn-blue btn-sm" href="/conges" style="text-decoration:none; padding:7px 12px; font-size:0.8rem; display:inline-flex; align-items:center; gap:5px;">📅 Gérer les congés</a>
+          <button class="btn btn-ghost btn-sm" onclick="loadBoardRH()">↻ Rafraîchir</button>
+        </div>
+      </div>
+
+      <!-- Stats RH Row -->
+      <div class="stat-row">
+        <div class="stat g"><div class="stat-label">Présents</div><div class="stat-val g" id="rh-present">—</div><div class="stat-desc">Présents aujourd'hui</div></div>
+        <div class="stat o"><div class="stat-label">Absents</div><div class="stat-val o" id="rh-absent">—</div><div class="stat-desc">Non pointés aujourd'hui</div></div>
+        <div class="stat y"><div class="stat-label">Retards</div><div class="stat-val y" id="rh-retards">—</div><div class="stat-desc">Arrivés en retard today</div></div>
+        <div class="stat b"><div class="stat-label">Congés</div><div class="stat-val b" id="rh-conges">—</div><div class="stat-desc">En congés autorisés</div></div>
+        <div class="stat r"><div class="stat-label">Maladies</div><div class="stat-val o" id="rh-maladies" style="color:var(--orange);">—</div><div class="stat-desc">En arrêt maladie</div></div>
+        <div class="stat p"><div class="stat-label">Missions</div><div class="stat-val p" id="rh-missions" style="color:var(--purple);">—</div><div class="stat-desc">En mission externe</div></div>
+      </div>
+
+      <!-- Live Search / Filter bar for Board RH -->
+      <div class="card mb-12" style="margin-bottom:16px;">
+        <div class="flex gap-8 items-center justify-between" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <input class="fi" style="flex:1; min-width: 250px; max-width: 380px;" type="text" id="board-rh-search" placeholder="Rechercher par collaborateur ou poste..." oninput="filterBoardRH(this.value)"/>
+          <div class="flex gap-8" id="rh-filter-buttons" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm active-rh-filter" onclick="filterBoardRHStatus('', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem;">Tous</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterBoardRHStatus('Présent', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem; color:var(--accent);">Présents</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterBoardRHStatus('Absent', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem; color:var(--orange);">Absents</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterBoardRHStatus('Retard', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem; color:var(--yellow);">Retards</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterBoardRHStatus('Congé', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem; color:var(--blue);">Congés</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterBoardRHStatus('Maladie', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem; color:var(--orange);">Maladies</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterBoardRHStatus('Mission', this)" style="border:1px solid var(--border); padding:6px 12px; font-size:0.75rem; color:var(--purple);">Missions</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Complete RH Attendance Table -->
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Collaborateur</th>
+                <th>Poste</th>
+                <th>Statut d'Aujourd'hui</th>
+                <th>Heure d'Entrée</th>
+                <th>Heure de Sortie</th>
+                <th>Détails & Absences</th>
+                <th>Confiance Match</th>
+                <th>Dispo / GPS</th>
+              </tr>
+            </thead>
+            <tbody id="board-rh-table-body">
+              <tr>
+                <td colspan="8" class="muted text-center" style="padding:28px;">Chargement du tableau RH en cours...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -436,7 +507,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Nom complet</th><th>Poste</th><th>Email</th><th>Token d'accès</th><th>Visage</th><th>Statut</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Nom complet</th><th>Poste</th><th>Conf. Horaires / Fin</th><th>Email</th><th>Token d'accès</th><th>Visage</th><th>Statut</th><th>Actions</th></tr></thead>
           <tbody id="emp-table"></tbody>
         </table>
       </div>
@@ -462,7 +533,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
       </div>
       <div class="card">
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Employé</th><th>Type</th><th>Date</th><th>Heure</th><th>Confiance</th><th>Latitude</th><th>Longitude</th><th>Statut</th></tr></thead>
+          <thead><tr><th>Employé</th><th>Type</th><th>Date</th><th>Heure</th><th>Fin prévue</th><th>Heures Sup.</th><th>Confiance</th><th>Latitude</th><th>Longitude</th><th>Statut</th></tr></thead>
           <tbody id="rep-table"></tbody>
         </table></div>
       </div>
@@ -492,6 +563,15 @@ html, body { overflow-x: hidden; max-width: 100vw; }
             <div id="sb-status" class="badge bg" style="display:inline-flex;margin-top:4px;">◉ Connecté</div>
           </div>
           <button class="btn btn-blue btn-full mt-8" onclick="testSupabase()">Tester la connexion</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Heures Supplémentaires</div>
+          <div class="alert alert-success mt-8"><span>🕐</span> Configurez l'heure de départ standard de fin de journée pour le calcul automatique.</div>
+          <div class="fg mt-8">
+            <label class="fl">Heure de fin prévue globale (ex: 17:00)</label>
+            <input class="fi" type="text" id="set-overtime-end" value="17:00" placeholder="17:00"/>
+          </div>
+          <button class="btn btn-green btn-full mt-8" onclick="saveOvertimeSettings()">Enregistrer l'heure</button>
         </div>
       </div>
       <div class="card mt-16">
@@ -570,6 +650,27 @@ html, body { overflow-x: hidden; max-width: 100vw; }
   </div>
 </div>
 
+<!-- ══ MODAL : PLAN END TIME ══ -->
+<div class="modal-bd" id="modal-planned-end">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">Heure de fin prévue</div>
+    <div class="modal-sub font-semibold text-lg text-primary" id="mpe-emp-name">Employé</div>
+    <div class="divider"></div>
+    <div class="fg" style="margin-top:12px;">
+      <label class="fl">Saisir l'heure de fin pour cet employé</label>
+      <input class="fi" id="mpe-time" type="text" placeholder="ex : 17:00" value="17:00"/>
+    </div>
+    <div class="alert alert-info" style="margin-top:12px;">
+      <span>ℹ</span><span>Laissez vide pour utiliser l'heure standard globale de l'entreprise (17:00).</span>
+    </div>
+    <input type="hidden" id="mpe-emp-id"/>
+    <div class="flex gap-8 mt-16">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-planned-end')">Annuler</button>
+      <button class="btn btn-green" style="flex:1" onclick="savePlannedEnd()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══ CONFIG ══
 const SUPABASE_URL = 'https://cokuyebjlkuolwpwizko.supabase.co';
@@ -579,6 +680,65 @@ let allEmployees = [];
 let empSearchVal = '', empStatusVal = '';
 let cachedPointages = [];
 let generatedToken = '';
+let boardRHSearchVal = '';
+let boardRHStatusVal = '';
+let boardRHEmployees = [];
+let boardRHPointages = [];
+let boardRHLeaves = [];
+
+// ══ OVERTIME LOGIC ══
+function calculateOvertime(p, empPlannedEnds, defaultEnd) {
+  if (p.type !== 'sortie' && p.type !== 'déconnexion' && p.type !== 'Sortie') return null;
+  const plEnd = empPlannedEnds[p.employee_id] || defaultEnd || '17:00';
+  const parts = plEnd.split(':');
+  if (parts.length < 2) return null;
+  const plannedH = parseInt(parts[0], 10);
+  const plannedM = parseInt(parts[1], 10);
+  if (isNaN(plannedH) || isNaN(plannedM)) return null;
+
+  const t = new Date(p.created_at);
+  const depH = t.getHours();
+  const depM = t.getMinutes();
+
+  const depTotal = depH * 60 + depM;
+  const plannedTotal = plannedH * 60 + plannedM;
+
+  const diff = depTotal - plannedTotal;
+  if (diff > 0) {
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    return {
+      minutes: diff,
+      text: `${h}h${String(m).padStart(2, '0')}`,
+      plannedEnd: plEnd
+    };
+  }
+  return null;
+}
+
+function configurePlannedEnd(empId, empName) {
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+  document.getElementById('mpe-emp-id').value = empId;
+  document.getElementById('mpe-emp-name').textContent = empName;
+  document.getElementById('mpe-time').value = empPlannedEnds[empId] || defaultEnd;
+  document.getElementById('modal-planned-end').classList.add('open');
+}
+
+function savePlannedEnd() {
+  const empId = document.getElementById('mpe-emp-id').value;
+  const timeVal = document.getElementById('mpe-time').value.trim();
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  if (timeVal) {
+    empPlannedEnds[empId] = timeVal;
+  } else {
+    delete empPlannedEnds[empId];
+  }
+  localStorage.setItem('lc_emp_planned_ends', JSON.stringify(empPlannedEnds));
+  closeModal('modal-planned-end');
+  loadEmployees();
+  loadDashboard();
+}
 
 // ══ SUPABASE ══
 async function sbGet(table, filters='') {
@@ -656,6 +816,7 @@ function showPage(id, el) {
   el.classList.add('active');
   document.getElementById('topbar-label').textContent = el.textContent.trim();
   if (id==='dashboard') loadDashboard();
+  if (id==='board-rh')  loadBoardRH();
   if (id==='live')      loadLive();
   if (id==='employees') loadEmployees();
   if (id==='pointages') loadPointages();
@@ -677,7 +838,280 @@ async function loadDashboard() {
   const withConf = pointages.filter(p=>p.face_confidence!=null);
   document.getElementById('s-conf').textContent = withConf.length
     ? (withConf.reduce((a,p)=>a+parseFloat(p.face_confidence),0)/withConf.length).toFixed(1)+'%' : '—';
+  const retards = pointages.filter(p=>p.est_en_retard===true).length;
+  document.getElementById('s-retards').textContent = retards;
+
+  // Calculer les heures supplémentaires d'aujourd'hui
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+  let totalOvertimeMins = 0;
+  pointages.forEach(p => {
+    const ov = calculateOvertime(p, empPlannedEnds, defaultEnd);
+    if (ov) {
+      totalOvertimeMins += ov.minutes;
+    }
+  });
+  const hOver = Math.floor(totalOvertimeMins / 60);
+  const mOver = totalOvertimeMins % 60;
+  document.getElementById('s-overtime').textContent = totalOvertimeMins > 0 
+    ? `${hOver}h${String(mOver).padStart(2, '0')}`
+    : '0h00';
+
   renderPtTable('dash-log', pointages, empMap, false);
+}
+
+// ══ TABLEAU RH COMPLET ══
+async function loadBoardRH() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('board-rh-date').textContent = 
+    new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Fetch employees, today's pointages, and approved/all leaves
+  const [employees, pointages, leaves] = await Promise.all([
+    sbGet('employees', 'status=eq.actif&order=full_name.asc'),
+    sbGet('pointages', `created_at=gte.${today}T00:00:00&order=created_at.asc`),
+    sbGet('leaves')
+  ]);
+
+  boardRHEmployees = Array.isArray(employees) ? employees : [];
+  boardRHPointages = Array.isArray(pointages) ? pointages : [];
+  boardRHLeaves    = Array.isArray(leaves) ? leaves : [];
+
+  // Calculate high-level metrics for today
+  let countPresent = 0;
+  let countAbsent = 0;
+  let countRetards = 0;
+  let countConges = 0;
+  let countMaladies = 0;
+  let countMissions = 0;
+
+  boardRHEmployees.forEach(e => {
+    const statusObj = getEmployeeStatusToday(e, today);
+    if (statusObj.status === 'Présent') {
+      countPresent++;
+    } else if (statusObj.status === 'Retard') {
+      countPresent++;
+      countRetards++;
+    } else if (statusObj.status === 'Congé') {
+      countConges++;
+    } else if (statusObj.status === 'Maladie') {
+      countMaladies++;
+    } else if (statusObj.status === 'Mission') {
+      countMissions++;
+    } else {
+      countAbsent++;
+    }
+  });
+
+  // Render KPI values
+  document.getElementById('rh-present').textContent = countPresent;
+  document.getElementById('rh-absent').textContent  = countAbsent;
+  document.getElementById('rh-retards').textContent = countRetards;
+  document.getElementById('rh-conges').textContent  = countConges;
+  document.getElementById('rh-maladies').textContent = countMaladies;
+  document.getElementById('rh-missions').textContent = countMissions;
+
+  renderBoardRHTable();
+}
+
+function getEmployeeStatusToday(e, todayDate) {
+  // 1. Get all of today's pointages for this employee
+  const pts = boardRHPointages.filter(p => p.employee_id === e.id);
+  const entreePt = pts.find(p => p.type === 'entrée' || p.type === 'Entrée');
+  const sortiePt = pts.find(p => p.type === 'sortie' || p.type === 'Sortie' || p.type === 'déconnexion');
+
+  // 2. Check active leaves for today
+  const activeLeave = boardRHLeaves.find(l => {
+    return l.employee_id === e.id && 
+           l.status !== 'refusé' &&
+           l.start_date <= todayDate && 
+           l.end_date >= todayDate;
+  });
+
+  if (entreePt) {
+    if (entreePt.est_en_retard === true) {
+      return {
+        status: 'Retard',
+        entree: entreePt,
+        sortie: sortiePt,
+        details: 'En retard de pointage'
+      };
+    }
+    return {
+      status: 'Présent',
+      entree: entreePt,
+      sortie: sortiePt,
+      details: 'En poste'
+    };
+  }
+
+  if (activeLeave) {
+    const type = activeLeave.leave_type || '';
+    if (type === 'Maladie') {
+      return {
+        status: 'Maladie',
+        leave: activeLeave,
+        details: 'Arrêt de travail (Maladie)'
+      };
+    } else if (type === 'Mission') {
+      return {
+        status: 'Mission',
+        leave: activeLeave,
+        details: activeLeave.notes || 'Mission professionnelle'
+      };
+    } else {
+      return {
+        status: 'Congé',
+        leave: activeLeave,
+        details: `${type} (${activeLeave.notes || 'Autorisé'})`
+      };
+    }
+  }
+
+  return {
+    status: 'Absent',
+    details: 'Aucun pointage aujourd\'hui'
+  };
+}
+
+function filterBoardRH(v) {
+  boardRHSearchVal = v.toLowerCase();
+  renderBoardRHTable();
+}
+
+function filterBoardRHStatus(status, btnEl) {
+  boardRHStatusVal = status;
+
+  // Manage button styling
+  if (btnEl) {
+    const parentContainer = document.getElementById('rh-filter-buttons');
+    if (parentContainer) {
+      parentContainer.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('active-rh-filter');
+        btn.style.backgroundColor = '';
+        btn.style.color = '';
+        btn.style.borderColor = 'var(--border)';
+      });
+      btnEl.classList.add('active-rh-filter');
+      btnEl.style.backgroundColor = 'var(--accent-dim)';
+      btnEl.style.color = 'var(--accent)';
+      btnEl.style.borderColor = 'var(--accent)';
+    }
+  }
+
+  renderBoardRHTable();
+}
+
+function renderBoardRHTable() {
+  const tbody = document.getElementById('board-rh-table-body');
+  if (!tbody) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const filteredList = boardRHEmployees.filter(e => {
+    // Search filter
+    const matchesSearch = !boardRHSearchVal || 
+                         e.full_name.toLowerCase().includes(boardRHSearchVal) || 
+                         (e.post || '').toLowerCase().includes(boardRHSearchVal);
+
+    if (!matchesSearch) return false;
+
+    // Status filter
+    if (boardRHStatusVal) {
+      const sObj = getEmployeeStatusToday(e, today);
+      if (boardRHStatusVal === 'Présent') {
+        return sObj.status === 'Présent' || sObj.status === 'Retard';
+      }
+      return sObj.status === boardRHStatusVal;
+    }
+
+    return true;
+  });
+
+  if (!filteredList.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="muted text-center" style="padding:28px;">Aucun collaborateur ne correspond à ces critères.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredList.map(e => {
+    const sObj = getEmployeeStatusToday(e, today);
+    let statusBadge = '';
+    let detailText = sObj.details || '—';
+    let checkInTime = '—';
+    let checkOutTime = '—';
+    let gpsLocation = '—';
+    let confidenceText = '—';
+
+    // Build values based on calculated status
+    if (sObj.status === 'Présent') {
+      statusBadge = '<span class="badge bg" style="font-weight:600; padding:4px 10px;">◉ PRÉSENT</span>';
+      checkInTime = sObj.entree ? new Date(sObj.entree.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '—';
+      checkOutTime = sObj.sortie ? new Date(sObj.sortie.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '—';
+      gpsLocation = (sObj.entree && sObj.entree.latitude) ? `${parseFloat(sObj.entree.latitude).toFixed(4)}, ${parseFloat(sObj.entree.longitude).toFixed(4)}` : '—';
+      confidenceText = sObj.entree && sObj.entree.face_confidence ? parseFloat(sObj.entree.face_confidence).toFixed(1) + '%' : 'Manuel';
+      detailText = 'En service';
+    } 
+    else if (sObj.status === 'Retard') {
+      statusBadge = '<span class="badge by" style="font-weight:600; padding:4px 10px; color:var(--yellow); background:var(--yellow-dim);">⚠ EN RETARD</span>';
+      checkInTime = sObj.entree ? new Date(sObj.entree.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '—';
+      checkOutTime = sObj.sortie ? new Date(sObj.sortie.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '—';
+      gpsLocation = (sObj.entree && sObj.entree.latitude) ? `${parseFloat(sObj.entree.latitude).toFixed(4)}, ${parseFloat(sObj.entree.longitude).toFixed(4)}` : '—';
+      confidenceText = sObj.entree && sObj.entree.face_confidence ? parseFloat(sObj.entree.face_confidence).toFixed(1) + '%' : 'Manuel';
+
+      let lateMin = '';
+      if (sObj.entree) {
+        const entTime = new Date(sObj.entree.created_at);
+        const expTime = new Date(sObj.entree.created_at);
+        expTime.setHours(8, 0, 0, 0);
+        const diffMs = entTime - expTime;
+        if (diffMs > 0) {
+          const lMins = Math.floor(diffMs / 60000);
+          lateMin = ` (+${lMins} min)`;
+        }
+      }
+      detailText = `Arrivée en retard${lateMin}`;
+    } 
+    else if (sObj.status === 'Absent') {
+      statusBadge = '<span class="badge bo" style="font-weight:600; padding:4px 10px;">◉ ABSENT</span>';
+      detailText = 'Pas de pointage enregistré';
+    } 
+    else if (sObj.status === 'Congé') {
+      statusBadge = '<span class="badge bb" style="font-weight:600; padding:4px 10px;">🌴 EN CONGÉ</span>';
+      if (sObj.leave) {
+        detailText = `Congé du ${new Date(sObj.leave.start_date).toLocaleDateString('fr-FR', {day:'numeric', month:'short'})} au ${new Date(sObj.leave.end_date).toLocaleDateString('fr-FR', {day:'numeric', month:'short'})}`;
+      }
+    } 
+    else if (sObj.status === 'Maladie') {
+      statusBadge = '<span class="badge bo" style="font-weight:600; padding:4px 10px; background:rgba(247,129,102,0.15); color:var(--orange);">🤒 MALADIE</span>';
+      if (sObj.leave) {
+        detailText = `Arrêt du ${new Date(sObj.leave.start_date).toLocaleDateString('fr-FR', {day:'numeric', month:'short'})} au ${new Date(sObj.leave.end_date).toLocaleDateString('fr-FR', {day:'numeric', month:'short'})}`;
+      }
+    } 
+    else if (sObj.status === 'Mission') {
+      statusBadge = '<span class="badge bp" style="font-weight:600; padding:4px 10px;">💼 EN MISSION</span>';
+      if (sObj.leave) {
+        detailText = sObj.leave.notes || 'Mission professionnelle autorisée';
+      }
+    }
+
+    const mapUrl = gpsLocation !== '—' 
+      ? `https://www.google.com/maps?q=${gpsLocation}`
+      : '#';
+
+    const gpsHtml = gpsLocation !== '—'
+      ? `<a href="${mapUrl}" target="_blank" style="color:var(--blue); text-decoration:none;" class="mono text-sm">📍 ${gpsLocation}</a>`
+      : '<span class="muted">—</span>';
+
+    return `<tr>
+      <td><strong>${e.full_name}</strong></td>
+      <td class="muted text-sm">${e.post || '—'}</td>
+      <td>${statusBadge}</td>
+      <td class="mono font-semibold" style="font-size:0.8rem; color:${checkInTime !== '—' ? 'var(--blue)' : 'var(--text3)'};">${checkInTime}</td>
+      <td class="mono font-semibold" style="font-size:0.8rem; color:${checkOutTime !== '—' ? 'var(--purple)' : 'var(--text3)'};">${checkOutTime}</td>
+      <td class="muted" style="font-size:0.82rem;">${detailText}</td>
+      <td class="mono" style="font-size:0.75rem;">${confidenceText}</td>
+      <td>${gpsHtml}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ══ LIVE ══
@@ -698,12 +1132,26 @@ function renderPtTable(tbodyId, pointages, empMap, showDate) {
     tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">Aucun pointage.</td></tr>`;
     return;
   }
-  const badge = t=>({
-    'entrée':'<span class="badge bg">↑ Entrée</span>',
-    'sortie':'<span class="badge bo">↓ Sortie</span>',
-    'pause': '<span class="badge by">⏸ Pause</span>',
-    'retour':'<span class="badge bb">▶ Retour</span>',
-  }[t]||`<span class="badge">${t}</span>`);
+
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+
+  const badge = (t, pID, pObj) => {
+    let base = {
+      'entrée':'<span class="badge bg">↑ Entrée</span>',
+      'sortie':'<span class="badge bo">↓ Sortie</span>',
+      'pause': '<span class="badge by">⏸ Pause</span>',
+      'retour':'<span class="badge bb">▶ Retour</span>',
+    }[t] || `<span class="badge">${t}</span>`;
+
+    if (t === 'sortie' || t === 'déconnexion' || t === 'Sortie') {
+      const ov = calculateOvertime(pObj, empPlannedEnds, defaultEnd);
+      if (ov) {
+        base += ` <span class="badge bp" style="font-size:0.7rem;margin-left:4px;font-weight:600;" title="Heures supplémentaires">+${ov.text} Sup.</span>`;
+      }
+    }
+    return base;
+  };
 
   tbody.innerHTML = pointages.map(p=>{
     const emp = empMap[p.employee_id]||{full_name:p.employee_id,post:'—'};
@@ -719,7 +1167,7 @@ function renderPtTable(tbodyId, pointages, empMap, showDate) {
     return `<tr>
       <td><strong>${emp.full_name}</strong></td>
       ${showDate?`<td class="muted text-sm">${emp.post||'—'}</td>`:''}
-      <td>${badge(p.type)}</td>
+      <td>${badge(p.type, p.employee_id, p)}</td>
       ${showDate?`<td class="mono muted" style="font-size:0.75rem;">${t.toLocaleDateString('fr-FR')}</td>`:''}
       <td class="mono" style="font-size:0.78rem;">${t.toLocaleTimeString('fr-FR')}</td>
       <td>${confHtml}</td>
@@ -746,31 +1194,44 @@ function renderEmpTable() {
   });
   const tbody = document.getElementById('emp-table');
   if (!list.length) {
-    tbody.innerHTML=`<tr><td colspan="7" class="muted text-center" style="padding:28px;">Aucun employé trouvé.</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">Aucun employé trouvé.</td></tr>`;
     return;
   }
-  tbody.innerHTML = list.map(e=>`<tr>
-    <td><strong>${e.full_name}</strong></td>
-    <td class="muted text-sm">${e.post||'—'}</td>
-    <td class="mono muted" style="font-size:0.75rem;">${e.email||'—'}</td>
-    <td>
-      ${e.login_token
-        ? `<span class="badge bp" style="cursor:pointer;" onclick="showToken('${e.id}','${e.full_name}','${e.login_token}')">${e.login_token}</span>`
-        : '<span class="muted text-sm">—</span>'}
-    </td>
-    <td>${e.face_token
-      ? '<span class="badge bg">✓ Enregistré</span>'
-      : '<span class="badge bo">Non enregistré</span>'}</td>
-    <td><span class="badge ${e.status==='actif'?'bg':'bo'}">${e.status}</span></td>
-    <td>
-      <div class="flex gap-8">
-        <button class="btn btn-ghost btn-sm" onclick="regenerateToken('${e.id}','${e.full_name}')">↻ Token</button>
-        <button class="btn btn-danger btn-sm" onclick="toggleStatus('${e.id}','${e.status}')">
-          ${e.status==='actif'?'Désactiver':'Activer'}
-        </button>
-      </div>
-    </td>
-  </tr>`).join('');
+
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+
+  tbody.innerHTML = list.map(e=>{
+    const plEnd = empPlannedEnds[e.id] || defaultEnd;
+    return `<tr>
+      <td><strong>${e.full_name}</strong></td>
+      <td class="muted text-sm">${e.post||'—'}</td>
+      <td>
+        <span class="badge bp" style="cursor:pointer;font-weight:600;" title="Modifier les horaires pour cet employé" onclick="configurePlannedEnd('${e.id}', '${e.full_name.replace(/'/g, "\\'")}')">
+          🕒 ${plEnd}
+        </span>
+      </td>
+      <td class="mono muted" style="font-size:0.75rem;">${e.email||'—'}</td>
+      <td>
+        ${e.login_token
+          ? `<span class="badge bp" style="cursor:pointer;" onclick="showToken('${e.id}','${e.full_name}','${e.login_token}')">${e.login_token}</span>`
+          : '<span class="muted text-sm">—</span>'}
+      </td>
+      <td>${e.face_token
+        ? '<span class="badge bg">✓ Enregistré</span>'
+        : '<span class="badge bo">Non enregistré</span>'}</td>
+      <td><span class="badge ${e.status==='actif'?'bg':'bo'}">${e.status}</span></td>
+      <td>
+        <div class="flex gap-8">
+          <button class="btn btn-ghost btn-sm" onclick="configurePlannedEnd('${e.id}', '${e.full_name.replace(/'/g, "\\'")}')">🕒 Fin</button>
+          <button class="btn btn-ghost btn-sm" onclick="regenerateToken('${e.id}','${e.full_name}')">↻ Token</button>
+          <button class="btn btn-danger btn-sm" onclick="toggleStatus('${e.id}','${e.status}')">
+            ${e.status==='actif'?'Désactiver':'Activer'}
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 // ══ CREATE EMPLOYEE ══
@@ -890,17 +1351,32 @@ async function loadPointages() {
   employees.forEach(e=>empMap[e.id]=e);
   const tbody = document.getElementById('rep-table');
   if (!pointages.length) {
-    tbody.innerHTML=`<tr><td colspan="8" class="muted text-center" style="padding:28px;">Aucun pointage pour cette période.</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="10" class="muted text-center" style="padding:28px;">Aucun pointage pour cette période.</td></tr>`;
     return;
   }
+
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+
   tbody.innerHTML = pointages.map(p=>{
     const emp = empMap[p.employee_id]||{full_name:p.employee_id};
     const t   = new Date(p.created_at);
+    const ov = calculateOvertime(p, empPlannedEnds, defaultEnd);
+    const plEnd = empPlannedEnds[p.employee_id] || defaultEnd;
+    const plEndHtml = (p.type === 'sortie' || p.type === 'déconnexion' || p.type === 'Sortie') 
+      ? `<span class="badge by" style="font-size:0.75rem;">🕒 ${plEnd}</span>` 
+      : '<span class="muted" style="font-size:0.75rem;">—</span>';
+    const ovHtml = ov 
+      ? `<span class="badge bp" style="font-weight:600;">+${ov.text}</span>` 
+      : '<span class="muted" style="font-size:0.75rem;">—</span>';
+
     return `<tr>
       <td>${emp.full_name}</td>
       <td>${p.type}</td>
       <td class="mono" style="font-size:0.78rem;">${t.toLocaleDateString('fr-FR')}</td>
       <td class="mono" style="font-size:0.78rem;">${t.toLocaleTimeString('fr-FR')}</td>
+      <td>${plEndHtml}</td>
+      <td>${ovHtml}</td>
       <td class="mono" style="font-size:0.78rem;">${p.face_confidence!=null?parseFloat(p.face_confidence).toFixed(1)+'%':'—'}</td>
       <td class="mono muted" style="font-size:0.75rem;">${p.latitude||'—'}</td>
       <td class="mono muted" style="font-size:0.75rem;">${p.longitude||'—'}</td>
@@ -911,17 +1387,53 @@ async function loadPointages() {
 
 function exportCSV() {
   if (!cachedPointages.length) { alert('Générez d\'abord un rapport.'); return; }
-  const h = ['ID','employee_id','type','created_at','face_confidence','latitude','longitude','statut'];
-  const csv = [h.join(','), ...cachedPointages.map(p=>h.map(k=>`"${p[k]||''}"`).join(','))].join('\n');
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+
+  const h = ['ID_Pointage','Employe','Type','Date','Heure','Fin Prevue','Heures Sup.','Confiance','Latitude','Longitude','Statut'];
+  const csvRows = [h.join(',')];
+
+  cachedPointages.forEach(p => {
+    const t = new Date(p.created_at);
+    const ov = calculateOvertime(p, empPlannedEnds, defaultEnd);
+    const plEnd = empPlannedEnds[p.employee_id] || defaultEnd;
+    const row = [
+      p.id || '',
+      p.employee_id || '',
+      p.type || '',
+      t.toLocaleDateString('fr-FR'),
+      t.toLocaleTimeString('fr-FR'),
+      (p.type === 'sortie' || p.type === 'déconnexion' || p.type === 'Sortie') ? plEnd : '',
+      ov ? '+' + ov.text : '',
+      p.face_confidence != null ? parseFloat(p.face_confidence).toFixed(1) + '%' : '—',
+      p.latitude || '',
+      p.longitude || '',
+      p.statut || ''
+    ];
+    csvRows.push(row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
+  });
+
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'lightcheck-pointages.csv'; a.click();
+  a.href = URL.createObjectURL(new Blob([csvRows.join('\n')],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'lightcheck-pointages-overtime.csv'; a.click();
 }
 function exportJSON() {
   if (!cachedPointages.length) { alert('Générez d\'abord un rapport.'); return; }
+  const empPlannedEnds = JSON.parse(localStorage.getItem('lc_emp_planned_ends') || '{}');
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+
+  const enrichedData = cachedPointages.map(p => {
+    const ov = calculateOvertime(p, empPlannedEnds, defaultEnd);
+    return {
+      ...p,
+      fin_prevue: (p.type === 'sortie' || p.type === 'déconnexion' || p.type === 'Sortie') ? (empPlannedEnds[p.employee_id] || defaultEnd) : null,
+      heures_sup: ov ? ov.text : null
+    };
+  });
+
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(cachedPointages,null,2)],{type:'application/json'}));
-  a.download = 'lightcheck-pointages.json'; a.click();
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(enrichedData,null,2)],{type:'application/json'}));
+  a.download = 'lightcheck-pointages-overtime.json'; a.click();
 }
 
 // ══ SETTINGS (Supabase config table) ══
@@ -939,6 +1451,16 @@ async function loadSettings() {
   } catch(e) {
     console.warn('Impossible de charger la config Supabase :', e);
   }
+  // Charger les paramètres d'heures supplémentaires
+  const defaultEnd = localStorage.getItem('lc_overtime_end_default') || '17:00';
+  document.getElementById('set-overtime-end').value = defaultEnd;
+}
+
+function saveOvertimeSettings() {
+  const endVal = document.getElementById('set-overtime-end').value.trim() || '17:00';
+  localStorage.setItem('lc_overtime_end_default', endVal);
+  alert('✓ Heure de fin prévue sauvegardée : ' + endVal);
+  loadDashboard();
 }
 
 async function saveFaceppKeys() {

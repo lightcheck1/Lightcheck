@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Light Check — Congés et jours fériés</title>
+<title>Light Check — Conges et jours feries</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -428,6 +428,7 @@ tr.selected td{background:#eff8ff;}
             <option value="Maladie">Maladie</option>
             <option value="Maternité / Paternité">Maternité / Paternité</option>
             <option value="Sans solde">Sans solde</option>
+            <option value="Mission">Mission</option>
             <option value="Autre">Autre</option>
           </select>
         </div>
@@ -528,14 +529,14 @@ async function ensureTables() {
 }
 
 async function loadEmployees() {
-  const data = await sbGet('employees', 'select=id,name,color,company_id&order=name');
+  const data = await sbGet('employees', 'select=id,full_name,company_id&order=full_name');
   allEmployees = Array.isArray(data) ? data : [];
   const sel = document.getElementById('leave-employee');
   sel.innerHTML = '<option value="">Sélectionner un employé…</option>';
   allEmployees.forEach(e => {
     const opt = document.createElement('option');
     opt.value = e.id;
-    opt.textContent = e.name;
+    opt.textContent = e.full_name;
     sel.appendChild(opt);
   });
 }
@@ -711,7 +712,7 @@ function filterLeaves() {
 
   filteredLeaves = allLeaves.filter(l => {
     const emp = allEmployees.find(e => e.id === l.employee_id);
-    const name = (emp ? emp.name : (l.employee_name || '')).toLowerCase();
+    const name = (emp ? emp.full_name : (l.employee_name || '')).toLowerCase();
     if (q && !name.includes(q)) return false;
     if (grp && emp && emp.company_id !== grp) return false;
     if (!inclRejected && l.status === 'refusé') return false;
@@ -729,7 +730,7 @@ function sortLeaves() {
     if (sortField === 'name') {
       const ea = allEmployees.find(e => e.id === a.employee_id);
       const eb = allEmployees.find(e => e.id === b.employee_id);
-      va = ea ? ea.name : ''; vb = eb ? eb.name : '';
+      va = ea ? ea.full_name : ''; vb = eb ? eb.full_name : '';
     } else {
       va = a[sortField] || ''; vb = b[sortField] || '';
     }
@@ -790,9 +791,9 @@ function renderTable(start, end) {
 
   tbody.innerHTML = slice.map(l => {
     const emp = allEmployees.find(e => e.id === l.employee_id);
-    const name = emp ? emp.name : (l.employee_name || '—');
+    const name = emp ? emp.full_name : (l.employee_name || '—');
     const initials = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
-    const color = emp && emp.color ? emp.color : '#667085';
+    const color = '#3498db';
     const s = l.start_date || '—';
     const e = l.end_date   || '—';
     const days = (s !== '—' && e !== '—')
@@ -994,7 +995,7 @@ function exportCSV() {
   const rows = [['Nom','Date début','Date fin','Nb jours','Type','Statut','Notes']];
   filteredLeaves.forEach(l => {
     const emp = allEmployees.find(e => e.id === l.employee_id);
-    const name = emp ? emp.name : '';
+    const name = emp ? emp.full_name : '';
     const days = (l.start_date && l.end_date)
       ? Math.max(1, Math.round((new Date(l.end_date) - new Date(l.start_date)) / 86400000) + 1) : '';
     rows.push([name, l.start_date||'', l.end_date||'', days, l.leave_type||'', l.status||'', l.notes||'']);
@@ -1039,4 +1040,3 @@ function showToast(msg) {
 init();
 </script>
 </body>
-</html>
